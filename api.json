@@ -12,9 +12,7 @@
           "method": "POST",
           "path": "/accounts",
           "body": {
-            "username": "string",
-            "email": "string",
-            "password": "string"
+            "username": "string"
           },
           "response": {
             "account_id": "string",
@@ -25,8 +23,7 @@
           "method": "POST",
           "path": "/accounts/login",
           "body": {
-            "username_or_email": "string",
-            "password": "string"
+            "username": "string"
           },
           "response": {
             "token": "string"
@@ -36,8 +33,7 @@
           "method": "GET",
           "path": "/accounts/me",
           "response": {
-            "username": "string",
-            "email": "string"
+            "username": "string"
           }
         }
       },
