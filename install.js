@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
   var installBtn = document.getElementById("installBtn");
 
-  var downloadURL = "https://yourdomain.com/downloads/yourapp.exe"; // download url (*/ω＼*)
+  var downloadURL = ""; // download url (*/ω＼*)
 
   if (installBtn) {
     installBtn.addEventListener("click", function() {
