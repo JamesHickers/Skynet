@@ -25,7 +25,6 @@
   <input type="file" id="fileInput" />
   <button id="sendBtn">Send</button>
 </div>
-
 <script>
 const textInput = document.getElementById('textInput');
 const fileInput = document.getElementById('fileInput');
@@ -49,33 +48,30 @@ async function sendMessage() {
 
   if (file) {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('reqtype', 'fileupload');
+    formData.append('fileToUpload', file);
 
     try {
-      const res = await fetch('https://corsproxy.io/?https://tmpfiles.org/api/v1/upload', {
+      const res = await fetch('https://catbox.moe/user/api.php', {
         method: 'POST',
         body: formData
       });
 
-      if (!res.ok) throw new Error('Failed to upload. Server did not respond OK.');
+      const url = await res.text();
+      if (!url.startsWith('http')) throw new Error('Upload failed');
 
-      const json = await res.json();
-      const url = json?.data?.url?.trim();
+      const lower = file.name.toLowerCase();
 
-      if (!url) throw new Error('No valid URL returned.');
-
-      const ext = file.name.split('.').pop().toLowerCase();
-
-      if (/\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(ext)) {
+      if (lower.match(/\.(jpe?g|png|gif|webp|bmp)$/)) {
         embed = `<div><a href="${url}" target="_blank">${url}</a><br><img src="${url}" alt="image"></div>`;
-      } else if (/\.(mp4|webm|ogg)$/i.test(ext)) {
-        embed = `<div><a href="${url}" target="_blank">${url}</a><br><video controls src="${url}" style="max-width:100%;border-radius:8px;"></video></div>`;
-      } else if (/\.(mp3|wav|ogg|flac)$/i.test(ext)) {
-        embed = `<div><a href="${url}" target="_blank">${url}</a><br><audio controls src="${url}" style="width:100%;"></audio></div>`;
-      } else if (/\.(txt|log|md|json|js|html|lua|cpp|py|sh)$/i.test(ext)) {
-        embed = `<div><a href="${url}" target="_blank">${url}</a><br><iframe src="${url}" style="width:100%;height:300px;background:#111;border:none;"></iframe></div>`;
+      } else if (lower.match(/\.(mp4|webm|ogg)$/)) {
+        embed = `<div><a href="${url}" target="_blank">${url}</a><br><video controls src="${url}"></video></div>`;
+      } else if (lower.match(/\.(mp3|wav|ogg|flac)$/)) {
+        embed = `<div><a href="${url}" target="_blank">${url}</a><br><audio controls src="${url}"></audio></div>`;
+      } else if (lower.match(/\.(txt|log|md|json|js|html|lua|cpp)$/)) {
+        embed = `<div><a href="${url}" target="_blank">${url}</a><br><iframe src="${url}" style="width:100%;height:300px;background:#000;border:none;"></iframe></div>`;
       } else {
-        embed = `<div><a href="${url}" target="_blank" rel="noopener noreferrer">📎 ${file.name}</a></div>`;
+        embed = `<a href="${url}" target="_blank" rel="noopener noreferrer">📎 ${file.name}</a>`;
       }
 
     } catch (err) {
@@ -95,6 +91,5 @@ async function sendMessage() {
   chat.scrollTop = chat.scrollHeight;
 }
 </script>
-
 </body>
 </html>
