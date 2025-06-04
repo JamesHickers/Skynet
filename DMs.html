@@ -1,259 +1,105 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Skynet | App</title>
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #36393f;
-      color: #dcddde;
-      height: 100vh;
-      display: flex;
-    }
-    .sidebar {
-      width: 240px;
-      background-color: #2f3136;
-      display: flex;
-      flex-direction: column;
-    }
-    .sidebar-header {
-      height: 48px;
-      background-color: #202225;
-      display: flex;
-      align-items: center;
-      padding-left: 16px;
-      font-weight: bold;
-    }
-    .channels {
-      padding: 10px;
-      flex: 1;
-    }
-    .channel-item {
-      padding: 8px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .channel-item:hover {
-      background-color: #40444b;
-    }
-    .chat-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    .chat-header {
-      height: 48px;
-      background-color: #36393f;
-      display: flex;
-      align-items: center;
-      padding-left: 16px;
-      border-bottom: 1px solid #2f3136;
-      font-weight: bold;
-    }
-    .chat-messages {
-      flex: 1;
-      padding: 16px;
-      overflow-y: auto;
-      background-color: #2f3136;
-    }
-    .message {
-      margin-bottom: 12px;
-    }
-    .message-user {
-      font-weight: bold;
-      color: #fff;
-    }
-    .chat-input {
-      background-color: #40444b;
-      border-top: 1px solid #2f3136;
-      padding: 12px;
-      display: flex;
-      gap: 8px;
-    }
-    .chat-input input[type="text"] {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 4px;
-      background-color: #2f3136;
-      color: #dcddde;
-    }
-    .chat-input input[type="file"] {
-      color: #dcddde;
-    }
-    .chat-input button {
-      padding: 10px 16px;
-      background-color: #5865f2;
-      border: none;
-      border-radius: 4px;
-      color: white;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-  <div class="sidebar">
-    <div class="sidebar-header">Skynet</div>
-    <div class="channels">
-      <div class="channel-item"># general</div>
-      <div class="channel-item"># media</div>
-      <div class="channel-item"># ai-moderation</div>
-    </div>
-  </div>
+<script>
+const textInput = document.getElementById('textInput');
+const fileInput = document.getElementById('fileInput');
+const sendBtn = document.getElementById('sendBtn');
+const chatContainer = document.getElementById('chatMessagesContainer');
+const dmList = document.getElementById('dmList');
 
-  <div class="chat-area">
-    <div class="chat-header"># general</div>
-    <div class="chat-messages" id="chatMessages">
-      <div class="message">
-        <span class="message-user">SkynetBot</span>: Welcome to the future, where moderation is smarter than you.
-      </div>
-    </div>
-    <div class="chat-input">
-      <input type="file" id="fileInput" />
-      <input type="text" id="textInput" placeholder="Send a message..." />
-      <button id="sendBtn">Send</button>
-    </div>
-  </div>
-  <script>
-    const textInput = document.getElementById('textInput');
-    const fileInput = document.getElementById('fileInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const chat = document.getElementById('chatMessages');
+let activeDM = null;
+const users = ['Allie', 'xqmvi2', 'Barney']; // Replace with actual usernames or load dynamically
 
-    sendBtn.addEventListener('click', sendMessage);
-    textInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
+function createDMThread(username) {
+  const thread = document.createElement('div');
+  thread.id = `chatMessages-${username}`;
+  thread.className = 'chat-thread';
+  thread.style.display = 'none';
+  thread.style.maxWidth = '600px';
+  thread.style.margin = '20px auto';
+  thread.style.background = '#222';
+  thread.style.padding = '10px';
+  thread.style.height = '300px';
+  thread.style.overflowY = 'auto';
+  thread.style.borderRadius = '8px';
+  chatContainer.appendChild(thread);
+}
 
-    async function sendMessage() {
-      const text = textInput.value.trim();
-      const file = fileInput.files[0];
-      if (!text && !file) return;
+function switchDM(username) {
+  if (activeDM) document.getElementById(`chatMessages-${activeDM}`).style.display = 'none';
+  activeDM = username;
+  document.getElementById(`chatMessages-${username}`).style.display = 'block';
+}
 
-      let embed = '';
+users.forEach(username => {
+  createDMThread(username);
+  const btn = document.createElement('button');
+  btn.textContent = username;
+  btn.style.marginRight = '8px';
+  btn.onclick = () => switchDM(username);
+  dmList.appendChild(btn);
+});
 
-      if (file) {
-        const formData = new FormData();
-        formData.append('reqtype', 'fileupload');
-        formData.append('fileToUpload', file);
+// Default DM thread
+switchDM(users[0]);
 
-        try {
-          const res = await fetch('https://catbox.moe/user/api.php', {
-            method: 'POST',
-            body: formData
-          });
+sendBtn.addEventListener('click', sendMessage);
+textInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    sendMessage();
+  }
+});
 
-          const url = await res.text();
-          if (!url.startsWith('http')) throw new Error('Upload failed');
+async function sendMessage() {
+  const text = textInput.value.trim();
+  const file = fileInput.files[0];
+  if (!text && !file) return;
 
-          const lower = file.name.toLowerCase();
+  let embed = '';
 
-          if (lower.match(/\.(jpe?g|png|gif|webp|bmp)$/)) {
-            embed = `<div><a href="${url}" target="_blank">${url}</a><br><img src="${url}" alt="image"></div>`;
-          } else if (lower.match(/\.(mp4|webm|ogg)$/)) {
-            embed = `<div><a href="${url}" target="_blank">${url}</a><br><video controls src="${url}"></video></div>`;
-          } else if (lower.match(/\.(mp3|wav|ogg|flac)$/)) {
-            embed = `<div><a href="${url}" target="_blank">${url}</a><br><audio controls src="${url}"></audio></div>`;
-          } else if (lower.match(/\.(txt|log|md|json|js|html|lua|cpp)$/)) {
-            embed = `<div><a href="${url}" target="_blank">${url}</a><br><iframe src="${url}" style="width:100%;height:300px;background:#000;border:none;"></iframe></div>`;
-          } else {
-            embed = `<a href="${url}" target="_blank" rel="noopener noreferrer">📎 ${file.name}</a>`;
-          }
+  if (file) {
+    const formData = new FormData();
+    formData.append('reqtype', 'fileupload');
+    formData.append('fileToUpload', file);
 
-        } catch (err) {
-          alert("Upload failed: " + err.message);
-          return;
-        }
-      }
-
-      let messageHTML = '';
-      if (text) messageHTML += `<div class="message"><span class="message-user">You</span>: ${text}</div>`;
-      if (embed) messageHTML += `<div class="message"><span class="message-user">You</span>: ${embed}</div>`;
-
-      chat.insertAdjacentHTML('beforeend', messageHTML);
-
-      textInput.value = '';
-      fileInput.value = '';
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-    fetch('settings.json')
-      .then(response => {
-        if (!response.ok) throw new Error("Could not load settings.json");
-        return response.json();
-      })
-      .then(data => {
-        const user = data.user_account;
-
-        if (user.theme === "darkmode") {
-          document.body.style.backgroundColor = "#111";
-          document.body.style.color = "#eee";
-        } else {
-          document.body.style.backgroundColor = "#fff";
-          document.body.style.color = "#000";
-        }
-
-        const profile = `
-          <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #1a1a1a; border-radius: 8px; margin-bottom: 10px;">
-            <img src="${user.avatar}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%;" />
-            <div>
-              <div style="font-weight: bold; color: #4caf50;">
-                ${user.username}
-                <span style="font-size: 0.8em; color: ${user.status === 'online' ? '#0f0' : '#aaa'};">(${user.status})</span>
-              </div>
-              <div style="font-size: 0.9em; color: #ccc;">${user.bio}</div>
-            </div>
-          </div>
-        `;
-
-        document.getElementById('chatMessages').insertAdjacentHTML('afterbegin', profile);
-      })
-      .catch(error => {
-        console.error("Error loading settings:", error);
-        alert("Failed to load user settings.");
+    try {
+      const res = await fetch('https://catbox.moe/user/api.php', {
+        method: 'POST',
+        body: formData
       });
 
-    fetch('app_settings.json')
-      .then(response => {
-        if (!response.ok) throw new Error("Could not load app_settings.json");
-        return response.json();
-      })
-      .then(app => {
-        document.body.style.fontSize = `${app.font_size}px`;
-        document.documentElement.lang = app.language;
+      const url = await res.text();
+      if (!url.startsWith('http')) throw new Error('Upload failed');
 
-        if (app.show_timestamps) {
-          console.log("Timestamps are enabled");
-        }
+      const lower = file.name.toLowerCase();
 
-        if (app.notifications && !app.do_not_disturb) {
-          console.log("🔔 Notifications enabled");
-        }
+      if (lower.match(/\.(jpe?g|png|gif|webp|bmp)$/)) {
+        embed = `<div><a href="${url}" target="_blank">${url}</a><br><img src="${url}" alt="image"></div>`;
+      } else if (lower.match(/\.(mp4|webm|ogg)$/)) {
+        embed = `<div><a href="${url}" target="_blank">${url}</a><br><video controls src="${url}"></video></div>`;
+      } else if (lower.match(/\.(mp3|wav|ogg|flac)$/)) {
+        embed = `<div><a href="${url}" target="_blank">${url}</a><br><audio controls src="${url}"></audio></div>`;
+      } else if (lower.match(/\.(txt|log|md|json|js|html|lua|cpp)$/)) {
+        embed = `<div><a href="${url}" target="_blank">${url}</a><br><iframe src="${url}" style="width:100%;height:300px;background:#000;border:none;"></iframe></div>`;
+      } else {
+        embed = `<a href="${url}" target="_blank" rel="noopener noreferrer">📎 ${file.name}</a>`;
+      }
 
-        if (app.theme === 'dark') {
-          document.body.style.backgroundColor = '#111';
-          document.body.style.color = '#eee';
-        } else {
-          document.body.style.backgroundColor = '#fff';
-          document.body.style.color = '#000';
-        }
+    } catch (err) {
+      alert("Upload failed: " + err.message);
+      return;
+    }
+  }
 
-        if (app.custom_background) {
-          document.body.style.backgroundImage = "url('background.jpg')";
-        }
-      })
-      .catch(err => {
-        console.error("Error loading app settings:", err);
-        alert("Couldn't load app_settings.json");
-      });
-  </script>
-  <script src="CORS.js"></script>
-</body>
-</html>
+  const chat = document.getElementById(`chatMessages-${activeDM}`);
+  let messageHTML = '';
+  if (text) messageHTML += `<div class="message"><span class="message-user">You</span>: ${text}</div>`;
+  if (embed) messageHTML += `<div class="message"><span class="message-user">You</span>: ${embed}</div>`;
+  chat.insertAdjacentHTML('beforeend', messageHTML);
+
+  textInput.value = '';
+  fileInput.value = '';
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// settings.json and app_settings.json remain unchanged — they style the page globally
+</script>
