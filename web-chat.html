@@ -88,9 +88,6 @@
       align-items: center;
       gap: 10px;
     }
-    .preview {
-      margin-top: 10px;
-    }
     embed, audio, video, img {
       max-width: 100%;
       border-radius: 10px;
@@ -110,29 +107,34 @@
 
   <div class="chat-area">
     <div class="chat-header"># general</div>
-    <div class="chat-messages" id="chatMessages">
-      <div class="message">
-        <span class="message-user">SkynetBot</span>: Welcome to the future, where moderation is smarter than you.
-      </div>
-      <div class="message">
-        <span class="message-user">Barney</span>: this site slaps but feels like a bootleg discord fr
-      </div>
-      <div class="message">
-        <span class="message-user">SkynetBot</span>: That's because it is, Barney. Go back to ProtonMail.
-      </div>
-    </div>
-
+    <div class="chat-messages" id="chatMessages"></div>
     <div class="chat-input">
       <div class="embed-upload">
         <input type="file" id="fileInput" accept=".he-aac,.heif,.avif" />
         <button onclick="uploadFile()">Embed File</button>
       </div>
-      <input type="text" placeholder="Send a message..." />
-      <div class="preview" id="preview"></div>
+      <input type="text" id="textMessage" placeholder="Send a message..." onkeydown="if(event.key==='Enter') sendMessage()" />
     </div>
   </div>
 
   <script>
+    function appendMessage(user, content) {
+      const chat = document.getElementById('chatMessages');
+      const msg = document.createElement('div');
+      msg.className = 'message';
+      msg.innerHTML = `<span class="message-user">${user}</span>: ${content}`;
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('textMessage');
+      const content = input.value.trim();
+      if (!content) return;
+      appendMessage('You', content);
+      input.value = '';
+    }
+
     async function uploadFile() {
       const fileInput = document.getElementById('fileInput');
       const file = fileInput.files[0];
@@ -141,42 +143,37 @@
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch('/upload', {
-        method: 'POST',
-        body: formData
-      });
+      try {
+        const res = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
 
-      const data = await res.json();
-      if (res.status !== 200) {
-        alert("Upload failed: " + (data.message || "Unknown error"));
-        return;
+        const data = await res.json();
+        if (res.status !== 200) {
+          alert("Upload failed: " + (data.message || "Unknown error"));
+          return;
+        }
+
+        const mime = data.mime_type;
+        const src = data.embed_url || data.filename;
+
+        let tag = '';
+        if (mime === 'audio/aac' || mime === 'audio/x-hx-aac') {
+          tag = `<audio controls src="${src}" type="${mime}"></audio>`;
+        } else if (mime.startsWith('video/')) {
+          tag = `<video controls src="${src}" type="${mime}"></video>`;
+        } else if (mime.startsWith('image/')) {
+          tag = `<img src="${src}" alt="Embedded Image">`;
+        } else {
+          tag = `<embed src="${src}" type="${mime}">`;
+        }
+
+        appendMessage('You', tag);
+        fileInput.value = '';
+      } catch (err) {
+        alert('Upload error: ' + err.message);
       }
-
-      // Embed preview
-      const preview = document.getElementById('preview');
-      const chat = document.getElementById('chatMessages');
-      const mime = data.mime_type;
-      const src = data.embed_url || data.filename;
-
-      let tag = '';
-      if (mime === 'audio/aac' || mime === 'audio/x-hx-aac') {
-        tag = `<audio controls src="${src}" type="${mime}"></audio>`;
-      } else if (mime.startsWith('video/')) {
-        tag = `<video controls src="${src}" type="${mime}"></video>`;
-      } else if (mime.startsWith('image/')) {
-        tag = `<img src="${src}" alt="Embedded Image">`;
-      } else {
-        tag = `<embed src="${src}" type="${mime}">`;
-      }
-
-      preview.innerHTML = tag;
-
-      // Also inject into chat as a new message
-      const msg = document.createElement('div');
-      msg.className = 'message';
-      msg.innerHTML = `<span class="message-user">You</span>:<br>${tag}`;
-      chat.appendChild(msg);
-      chat.scrollTop = chat.scrollHeight;
     }
   </script>
 </body>
