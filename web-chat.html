@@ -120,6 +120,7 @@
   </div>
   <script src="index.js"></script>
   <script>
+<script>
 async function sendMessage() {
   const textInput = document.getElementById("textInput");
   const fileInput = document.getElementById("fileInput");
@@ -130,56 +131,54 @@ async function sendMessage() {
 
   if (!text && !file) return;
 
-  let messageHTML = `<div class="message"><span class="message-user">You</span>:`; // Start message content
+  let messageHTML = `<div class="message"><span class="message-user">You</span>:`;
 
+  // Add text if any
   if (text) {
     messageHTML += ` ${text}`;
   }
 
+  // Handle file upload if a file is selected
   if (file) {
     try {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await fetch("https://file.io", {
+      const res = await fetch("https://file.io/?expires=1d", {
         method: "POST",
         body: formData
       });
 
       const data = await res.json();
-      if (!data.success || !data.link) throw new Error("Upload failed");
+      if (!data.success) throw new Error("File upload failed");
 
-      const src = data.link;
+      const link = data.link;
       const ext = file.name.split('.').pop().toLowerCase();
 
-      // Simple extension-based MIME guess
-      const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heif', 'avif'];
-      const videoExts = ['mp4', 'webm', 'mkv'];
-      const audioExts = ['mp3', 'wav', 'ogg', 'aac', 'he-aac'];
-
-      if (imageExts.includes(ext)) {
-        messageHTML += `<br><img src="${src}" style="max-width:100%;border-radius:6px;margin-top:8px;">`;
-      } else if (videoExts.includes(ext)) {
-        messageHTML += `<br><video controls src="${src}" style="max-width:100%;border-radius:6px;margin-top:8px;"></video>`;
-      } else if (audioExts.includes(ext)) {
-        messageHTML += `<br><audio controls src="${src}" style="margin-top:8px;"></audio>`;
+      if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'heif', 'avif'].includes(ext)) {
+        messageHTML += `<br><img src="${link}" style="max-width:100%;margin-top:8px;border-radius:8px;">`;
+      } else if (['mp4', 'webm', 'mkv'].includes(ext)) {
+        messageHTML += `<br><video controls src="${link}" style="max-width:100%;margin-top:8px;border-radius:8px;"></video>`;
+      } else if (['mp3', 'aac', 'wav', 'ogg', 'he-aac'].includes(ext)) {
+        messageHTML += `<br><audio controls src="${link}" style="margin-top:8px;"></audio>`;
       } else {
-        messageHTML += `<br><embed src="${src}" style="margin-top:8px;">`;
+        messageHTML += `<br><a href="${link}" target="_blank">Download File</a>`;
       }
 
     } catch (err) {
-      console.warn("File upload failed:", err);
-      if (!text) return; // Don't send anything if all failed
+      console.error("Upload failed:", err);
+      if (!text) return;
     }
   }
 
   messageHTML += `</div>`;
   chat.insertAdjacentHTML("beforeend", messageHTML);
 
+  // Reset inputs
   textInput.value = "";
   fileInput.value = "";
   chat.scrollTop = chat.scrollHeight;
 }
-  </script>
+</script>
 </body>
 </html>
