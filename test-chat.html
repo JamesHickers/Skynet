@@ -28,56 +28,50 @@
 
 <script>
 async function sendMessage() {
-  const textInput = document.getElementById("textInput");
+  const text = document.getElementById("textInput").value.trim();
   const fileInput = document.getElementById("fileInput");
+  const file = fileInput.files[0];
   const chat = document.getElementById("chatMessages");
 
-  const text = textInput.value.trim();
-  const file = fileInput.files[0];
+  if (!file && !text) return; // No blank messages
 
-  if (!text && !file) return alert("Please enter a message or select a file.");
-
-  let messageHTML = `<div class="message"><span class="message-user">You</span>:`;
-
-  if (text) {
-    messageHTML += ` ${text}`;
-  }
-
+  let embed = '';
   if (file) {
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
+    const formData = new FormData();
+    formData.append('file', file);
 
-      const res = await fetch("https://file.io/?expires=1d", {
-        method: "POST",
+    try {
+      const res = await fetch('https://0x0.st', {
+        method: 'POST',
         body: formData
       });
 
-      const data = await res.json();
-      if (!data.success) throw new Error("Upload failed");
+      const url = await res.text();
+      if (!url.startsWith('http')) throw new Error('Upload failed');
 
-      const link = data.link;
-      const ext = file.name.split('.').pop().toLowerCase();
-
-      if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'heif', 'avif'].includes(ext)) {
-        messageHTML += `<br><img src="${link}" alt="Image" />`;
-      } else if (['mp4', 'webm', 'mkv'].includes(ext)) {
-        messageHTML += `<br><video controls src="${link}"></video>`;
-      } else if (['mp3', 'aac', 'wav', 'ogg', 'he-aac'].includes(ext)) {
-        messageHTML += `<br><audio controls src="${link}"></audio>`;
+      const mime = file.type;
+      if (mime.startsWith('image/')) {
+        embed = `<img src="${url.trim()}" style="max-width:100%;border-radius:6px;margin-top:8px;">`;
+      } else if (mime.startsWith('video/')) {
+        embed = `<video controls src="${url.trim()}" style="max-width:100%;border-radius:6px;margin-top:8px;"></video>`;
+      } else if (mime.startsWith('audio/')) {
+        embed = `<audio controls src="${url.trim()}" style="margin-top:8px;"></audio>`;
       } else {
-        messageHTML += `<br><a href="${link}" target="_blank">Download File</a>`;
+        embed = `<a href="${url.trim()}" target="_blank" rel="noopener noreferrer">Download File</a>`;
       }
-    } catch (error) {
-      alert("File upload failed: " + error.message);
-      if (!text) return;
+    } catch (e) {
+      alert('File upload failed: ' + e.message);
+      return;
     }
   }
 
-  messageHTML += `</div>`;
-  chat.insertAdjacentHTML("beforeend", messageHTML);
+  let messageHTML = '';
+  if (text) messageHTML += `<div class="message"><span class="message-user">You</span>: ${text}</div>`;
+  if (embed) messageHTML += `<div class="message"><span class="message-user">You</span>: ${embed}</div>`;
 
-  textInput.value = "";
+  chat.insertAdjacentHTML('beforeend', messageHTML);
+
+  document.getElementById("textInput").value = "";
   fileInput.value = "";
   chat.scrollTop = chat.scrollHeight;
 }
