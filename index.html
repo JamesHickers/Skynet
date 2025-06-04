@@ -1,145 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Krynet | AI Communication Platform</title>
-     <meta name ="description" content="Why are u here. It's just features? You're a strange one. 😂">
-    <link rel="stylesheet" href="style.css"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skynet | App</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #36393f;
+      color: #dcddde;
+      height: 100vh;
+      display: flex;
+    }
+    .sidebar {
+      width: 240px;
+      background-color: #2f3136;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header {
+      height: 48px;
+      background-color: #202225;
+      display: flex;
+      align-items: center;
+      padding-left: 16px;
+      font-weight: bold;
+    }
+    .channels {
+      padding: 10px;
+      flex: 1;
+    }
+    .channel-item {
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .channel-item:hover {
+      background-color: #40444b;
+    }
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-header {
+      height: 48px;
+      background-color: #36393f;
+      display: flex;
+      align-items: center;
+      padding-left: 16px;
+      border-bottom: 1px solid #2f3136;
+      font-weight: bold;
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      background-color: #2f3136;
+    }
+    .message {
+      margin-bottom: 12px;
+    }
+    .message-user {
+      font-weight: bold;
+      color: #fff;
+    }
+    .chat-input {
+      background-color: #40444b;
+      border-top: 1px solid #2f3136;
+      padding: 12px;
+    }
+    .chat-input input {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: #2f3136;
+      color: #dcddde;
+    }
+  </style>
 </head>
 <body>
-    <button><a href="Site.html">🤫</a></button>
-    <header class="site-header">
-        <div class="container">
-            <h1 class="logo">Krynet</h1>
-            <nav>
-                <ul>
-                    <li><a href="#intro">Intro</a></li>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#spotify">Spotify</a></li>
-                    <li><a href="#antivirus">Scan</a></li>
-                    <li><a href="#upscaling">Upscaling</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+  <div class="sidebar">
+    <div class="sidebar-header">Skynet</div>
+    <div class="channels">
+      <div class="channel-item"># general</div>
+      <div class="channel-item"># media</div>
+      <div class="channel-item"># ai-moderation</div>
+    </div>
+  </div>
 
-    <main class="container">
-        <section id="intro" class="card">
-            <h2>Welcome to Krynet</h2>
-            <p>The future of communication. Fast, secure, AI-moderated, and free from bloat.</p>
-        </section>
-
-        <section id="features" class="card">
-            <h2>Features</h2>
-            <ul class="features-list">
-                <li>⚡ Instant Communication</li>
-                <li>🤖 AI Moderation Engine</li>
-                <li>🛡️ Built-in Antivirus Scanner</li>
-                <li>🎧 Spotify Integration (Music Support Only)</li>
-                <li>🎮 Steam Store Integration</li>
-                <li>🔒 HEIF, HE-AAC, AVIF Only</li>
-                <li>📁 Media Embeds with AVIF/HEIF/HE-AAC</li>
-                <li>📡 100% API-Driven Infrastructure</li>
-                <li>📺 AI-Based Video Upscaling (GPU-aware)</li>
-                <li>🧠 All uploads are AI-scanned, format-verified, and deleted if malicious</li>
-            </ul>
-        </section>
-
-        <section id="spotify" class="card">
-            <h2>Spotify Now Playing</h2>
-            <button id="loginSpotify">Login with Spotify</button>
-            <div id="nowPlaying" class="now-playing">Not connected to Spotify.</div>
-        </section>
-
-        <section id="antivirus" class="card">
-            <h2>Upload File for Virus Scan</h2>
-            <form id="uploadForm">
-                <input type="file" id="fileInput" required />
-                <button type="submit">Upload & Scan</button>
-            </form>
-            <pre id="uploadResult"></pre>
-        </section>
-
-        <section id="upscaling" class="card">
-            <h2>Video Upscaling</h2>
-            <p>GPU Detected: <span id="gpuVendor">Detecting...</span></p>
-            <p><strong>Note:</strong> AI video enhancement only works with NVIDIA, AMD, or Intel GPUs.</p>
-        </section>
-    </main>
-<!-- Basic embed container -->
-<div class="embed-content">
-  <!-- Assume this gets injected dynamically -->
-  <embed src="/media/uploads/sample.avif" type="image/avif" />
-</div>
-    <footer>
-        <div class="container">
-            <p>&copy; 2025 Krynet. Powered by APIs. Inspired by progress.</p>
-        </div>
-    </footer>
-    <script>
-        // Spotify Auth
-        const clientId = '';
-        const redirectUri = window.location.origin;
-        const scopes = 'user-read-playback-state user-read-currently-playing';
-
-        // Login button event listener
-        document.getElementById('loginSpotify').addEventListener('click', () => {
-            const authUrl = `https://accounts.spotify.com/authorize?response_type=token&client_id=${clientId}&scope=${scopes}&redirect_uri=${redirectUri}`;
-            window.location = authUrl;
-        });
-
-        // On page load, check for token in URL
-        window.addEventListener('load', () => {
-            const hash = window.location.hash.substring(1);
-            const hashParams = {};
-            hash.split('&').forEach(param => {
-                const [key, value] = param.split('=');
-                if (key && value) hashParams[key] = decodeURIComponent(value);
-            });
-
-            const accessToken = hashParams['access_token'];
-
-            if (accessToken) {
-                // Set up Spotify player info with the access token
-                fetchSpotifyData(accessToken);
-            }
-
-            // GPU Detection
-            const canvas = document.createElement('canvas');
-            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-            const debugInfo = gl?.getExtension('WEBGL_debug_renderer_info');
-            const vendor = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'Unavailable';
-            const gpuVendor = /NVIDIA/i.test(vendor) ? 'NVIDIA' : /AMD|Radeon/i.test(vendor) ? 'AMD' : /Intel/i.test(vendor) ? 'Intel' : 'Other';
-            document.getElementById('gpuVendor').textContent = vendor || gpuVendor;
-        });
-
-        // Fetch currently playing track from Spotify API
-        async function fetchSpotifyData(accessToken) {
-            try {
-                const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    }
-                });
-                const data = await response.json();
-                const nowPlaying = document.getElementById('nowPlaying');
-                
-                if (data?.item) {
-                    const trackName = data.item.name;
-                    const artistNames = data.item.artists.map(artist => artist.name).join(', ');
-                    const albumArt = data.item.album.images[0].url;
-                    nowPlaying.innerHTML = `
-                        <p><strong>${trackName}</strong> by ${artistNames}</p>
-                        <img src="${albumArt}" width="100" alt="Album Art">
-                    `;
-                } else {
-                    nowPlaying.textContent = 'No track currently playing.';
-                }
-            } catch (err) {
-                document.getElementById('nowPlaying').textContent = 'Error fetching Spotify data: ' + err.message;
-            }
-        }
-    </script>
+  <div class="chat-area">
+    <div class="chat-header"># general</div>
+    <div class="chat-messages">
+      <div class="message">
+        <span class="message-user">SkynetBot</span>: Welcome to the future, where moderation is smarter than you.
+      </div>
+      <div class="message">
+        <span class="message-user">Barney</span>: this site slaps but feels like a bootleg discord fr
+      </div>
+      <div class="message">
+        <span class="message-user">SkynetBot</span>: That's because it is, Barney. Go back to ProtonMail.
+      </div>
+    </div>
+    <div class="chat-input">
+      <input type="text" placeholder="Send a message..." />
+    </div>
+  </div>
 </body>
 </html>
