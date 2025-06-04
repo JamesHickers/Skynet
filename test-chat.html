@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Chat w/ Third-Party Uploads</title>
-<style>
-  body { background:#111; color:#eee; font-family:sans-serif; }
-  #chatMessages { max-width:600px; margin:20px auto; background:#222; padding:10px; height:300px; overflow-y:auto; border-radius:8px; }
-  .message { margin-bottom:10px; }
-  .message-user { font-weight:bold; color:#4caf50; }
-  .chat-input { max-width:600px; margin:10px auto; display:flex; gap:10px; }
-  .chat-input input[type=text] { flex:1; padding:8px; border-radius:6px; border:none; }
-  .chat-input input[type=file] { padding:8px; background:#333; color:#eee; border-radius:6px; }
-  .chat-input button { padding:8px 16px; border:none; border-radius:6px; background:#4caf50; color:#fff; cursor:pointer; }
-  img, video, audio, iframe { max-width:100%; border-radius:8px; margin-top:5px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chat w/ tmpfiles Upload</title>
+  <style>
+    body { background: #111; color: #eee; font-family: sans-serif; }
+    #chatMessages { max-width: 600px; margin: 20px auto; background: #222; padding: 10px; height: 300px; overflow-y: auto; border-radius: 8px; }
+    .message { margin-bottom: 10px; }
+    .message-user { font-weight: bold; color: #4caf50; }
+    .chat-input { max-width: 600px; margin: 10px auto; display: flex; gap: 10px; }
+    .chat-input input[type=text] { flex: 1; padding: 8px; border-radius: 6px; border: none; }
+    .chat-input input[type=file] { padding: 8px; background: #333; color: #eee; border-radius: 6px; }
+    .chat-input button { padding: 8px 16px; border: none; border-radius: 6px; background: #4caf50; color: #fff; cursor: pointer; }
+    img, video, audio, iframe { max-width: 100%; border-radius: 8px; margin-top: 5px; }
+  </style>
 </head>
 <body>
 
@@ -52,23 +52,24 @@ async function sendMessage() {
     formData.append('file', file);
 
     try {
-      const res = await fetch('https://0x0.st', {
+      const res = await fetch('https://tmpfiles.org/api/v1/upload', {
         method: 'POST',
         body: formData
       });
-      const url = await res.text();
 
-      if (!url.startsWith('http')) throw new Error('Invalid response');
+      const json = await res.json();
+      if (!json || !json.data || !json.data.url) throw new Error('Upload failed');
 
-      const lower = url.toLowerCase();
+      const url = json.data.url;
+      const lower = file.name.toLowerCase();
 
       if (lower.match(/\.(jpg|jpeg|png|gif|webp|bmp)$/)) {
-        embed = `<img src="${url}" alt="img">`;
+        embed = `<img src="${url}" alt="image">`;
       } else if (lower.match(/\.(mp4|webm|ogg)$/)) {
         embed = `<video controls src="${url}"></video>`;
       } else if (lower.match(/\.(mp3|wav|ogg|flac)$/)) {
         embed = `<audio controls src="${url}"></audio>`;
-      } else if (lower.match(/\.(txt|log|md|json|js|lua|c|cpp|html)$/)) {
+      } else if (lower.match(/\.(txt|log|md|json|js|html|lua|cpp)$/)) {
         embed = `<iframe src="${url}" style="width:100%;height:300px;background:#000;border:none;"></iframe>`;
       } else {
         embed = `<a href="${url}" target="_blank" rel="noopener noreferrer">📎 ${file.name}</a>`;
