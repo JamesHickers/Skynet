@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Chat with File.io Upload</title>
+<title>Chat with File Upload</title>
 <style>
   body { background:#222; color:#eee; font-family:sans-serif; }
   #chatMessages { max-width: 600px; margin: 20px auto; background:#333; padding:10px; height:300px; overflow-y:auto; border-radius:8px; }
@@ -13,12 +13,12 @@
   .chat-input input[type=text] { flex:1; padding: 8px; border-radius: 6px; border:none; }
   .chat-input input[type=file] { padding: 8px; }
   .chat-input button { padding: 8px 16px; border:none; border-radius: 6px; background:#4caf50; color:#fff; cursor:pointer; }
-  img, video, audio { max-width: 100%; border-radius: 8px; margin-top: 5px; }
+  img, video, audio, iframe { max-width: 100%; border-radius: 8px; margin-top: 5px; }
 </style>
 </head>
 <body>
 
-<div class="chat-messages" id="chatMessages"></div>
+<div id="chatMessages"></div>
 
 <div class="chat-input">
   <input type="text" id="textInput" placeholder="Send a message..." />
@@ -34,7 +34,7 @@ sendBtn.addEventListener('click', sendMessage);
 
 textInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
-    e.preventDefault(); // prevent newline if textarea, or form submit
+    e.preventDefault();
     sendMessage();
   }
 });
@@ -45,34 +45,39 @@ async function sendMessage() {
   const file = fileInput.files[0];
   const chat = document.getElementById('chatMessages');
 
-  if (!file && !text) return; // no blank messages
+  if (!file && !text) return;
 
   let embed = '';
+
   if (file) {
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      const res = await fetch('https://0x0.st', {
+      const res = await fetch('/upload', {
         method: 'POST',
         body: formData
       });
 
-      const url = await res.text();
-      if (!url.startsWith('http')) throw new Error('Upload failed');
+      const data = await res.json();
+      const url = data.url;
 
-      const mime = file.type;
-      if (mime.startsWith('image/')) {
-        embed = `<img src="${url.trim()}" style="max-width:100%;border-radius:6px;margin-top:8px;">`;
-      } else if (mime.startsWith('video/')) {
-        embed = `<video controls src="${url.trim()}" style="max-width:100%;border-radius:6px;margin-top:8px;"></video>`;
-      } else if (mime.startsWith('audio/')) {
-        embed = `<audio controls src="${url.trim()}" style="margin-top:8px;"></audio>`;
+      const lower = url.toLowerCase();
+
+      if (lower.match(/\.(jpg|jpeg|png|gif|webp|bmp)$/)) {
+        embed = `<img src="${url}" alt="image">`;
+      } else if (lower.match(/\.(mp4|webm|ogg)$/)) {
+        embed = `<video controls src="${url}"></video>`;
+      } else if (lower.match(/\.(mp3|wav|ogg|flac)$/)) {
+        embed = `<audio controls src="${url}"></audio>`;
+      } else if (lower.match(/\.(txt|log|json|md|lua|py|js|html|c|cpp|sh)$/)) {
+        embed = `<iframe src="${url}" style="width:100%;height:300px;background:#111;border:none;"></iframe>`;
       } else {
-        embed = `<a href="${url.trim()}" target="_blank" rel="noopener noreferrer">Download File</a>`;
+        embed = `<a href="${url}" target="_blank" rel="noopener noreferrer">📎 Download: ${url}</a>`;
       }
-    } catch (e) {
-      alert('File upload failed: ' + e.message);
+
+    } catch (err) {
+      alert('Upload failed: ' + err.message);
       return;
     }
   }
