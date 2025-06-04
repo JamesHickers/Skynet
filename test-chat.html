@@ -128,6 +128,50 @@ fetch('settings.json')
     alert("Failed to load user settings.");
   });
 </script>
+<script>
+fetch('app_settings.json')
+  .then(response => {
+    if (!response.ok) throw new Error("Could not load app_settings.json");
+    return response.json();
+  })
+  .then(app => {
+    // Font size
+    document.body.style.fontSize = `${app.font_size}px`;
+
+    // Language (future use, e.g., localization)
+    document.documentElement.lang = app.language;
+
+    // Timestamps
+    if (app.show_timestamps) {
+      // You can later hook this into messages like:
+      // <span class="timestamp">[14:32]</span>
+      console.log("Timestamps are enabled");
+    }
+
+    // Notifications
+    if (app.notifications && !app.do_not_disturb) {
+      console.log("🔔 Notifications enabled");
+    }
+
+    // Theme override
+    if (app.theme === 'dark') {
+      document.body.style.backgroundColor = '#111';
+      document.body.style.color = '#eee';
+    } else {
+      document.body.style.backgroundColor = '#fff';
+      document.body.style.color = '#000';
+    }
+
+    // Optional: Custom background logic
+    if (app.custom_background) {
+      document.body.style.backgroundImage = "url('background.jpg')"; // example
+    }
+  })
+  .catch(err => {
+    console.error("Error loading app settings:", err);
+    alert("Couldn't load app_settings.json");
+  });
+</script>
 <script src="CORS.js"></script>
 </body>
 </html>
