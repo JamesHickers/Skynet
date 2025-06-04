@@ -25,6 +25,19 @@
         "blocked_users": [],
         "notifications": true
       }
+    },
+    {
+      "user_account": {
+        "username": "Barney_thekid7",
+        "email": "barney@thelegend.com",
+        "avatar": "https://th.bing.com/th/id/OIP.wpJwnLohA15dokFPg_p7WQHaEc?w=287&h=180&c=7&r=0&o=5&pid=1.7",
+        "status": "online",
+        "bio": "👾 The Legendary Developer | 🎮 Roblox’s Most Talked About Creator | 🛠️ Script Cracker Extraordinaire | 🔥 Breaking Barriers, Leaking Legends",
+        "theme": "darkmode",
+        "protonmail_verified": false,
+        "blocked_users": [],
+        "notifications": true
+      }
     }
   ]
 }
