@@ -11,3 +11,16 @@
     "notifications": true
   }
 }
+{
+  "user_account": {
+    "username": "7zh14",
+    "email": "7zh14@protonmail.com",
+    "avatar": "https://7zh14-dev.carrd.co/assets/images/image01.jpg?v=e3389653",
+    "status": "online",
+    "bio": "Multidisciplinary developer specializing in audio production, scriptwriting, and graphic design. Founder of Dead Lantern Games, focusing on immersive horror experiences using Unreal Engine. Known for contributions to projects like Crosswoods and Boomboxes.",
+    "theme": "darkmode",
+    "protonmail_verified": true,
+    "blocked_users": [],
+    "notifications": true
+  }
+}
