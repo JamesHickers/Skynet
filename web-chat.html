@@ -120,7 +120,7 @@
   </div>
   <script src="index.js"></script>
   <script>
-    async function sendMessage() {
+async function sendMessage() {
   const textInput = document.getElementById("textInput");
   const fileInput = document.getElementById("fileInput");
   const chat = document.getElementById("chatMessages");
@@ -128,7 +128,10 @@
   const text = textInput.value.trim();
   const file = fileInput.files[0];
 
-  let messageHTML = `<div class="message"><span class="message-user">You</span>:`; // Start message
+  // Don't do anything if no input at all
+  if (!text && !file) return;
+
+  let messageHTML = `<div class="message"><span class="message-user">You</span>:`; // Start message content
 
   if (text) {
     messageHTML += ` ${text}`;
@@ -144,11 +147,13 @@
         body: formData
       });
 
-      if (!res.ok) throw new Error("File upload failed");
+      if (!res.ok) throw new Error("Upload failed");
 
       const data = await res.json();
       const mime = data.mime_type || "";
       const src = data.embed_url || data.filename;
+
+      if (!src) throw new Error("No file URL returned");
 
       if (mime.startsWith("image/")) {
         messageHTML += `<br><img src="${src}" style="max-width:100%;border-radius:6px;margin-top:8px;">`;
@@ -161,22 +166,19 @@
       }
 
     } catch (err) {
-      console.error("Upload error:", err);
-      alert("File upload failed.");
-      return;
+      console.warn("File upload failed:", err);
+      if (!text) return; // Don't post anything if file failed and no text
     }
   }
 
-  messageHTML += `</div>`; // Close message div
+  messageHTML += `</div>`;
   chat.insertAdjacentHTML("beforeend", messageHTML);
 
-  // Clear inputs
   textInput.value = "";
   fileInput.value = "";
-
-  // Auto-scroll to bottom
   chat.scrollTop = chat.scrollHeight;
 }
+
   </script>
 </body>
 </html>
