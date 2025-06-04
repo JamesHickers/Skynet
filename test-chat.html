@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Chat with File Upload</title>
+<title>Chat w/ Third-Party Uploads</title>
 <style>
-  body { background:#222; color:#eee; font-family:sans-serif; }
-  #chatMessages { max-width: 600px; margin: 20px auto; background:#333; padding:10px; height:300px; overflow-y:auto; border-radius:8px; }
-  .message { margin-bottom: 10px; }
-  .message-user { font-weight: bold; color: #4caf50; }
-  .chat-input { max-width: 600px; margin: 10px auto; display: flex; gap: 10px; }
-  .chat-input input[type=text] { flex:1; padding: 8px; border-radius: 6px; border:none; }
-  .chat-input input[type=file] { padding: 8px; }
-  .chat-input button { padding: 8px 16px; border:none; border-radius: 6px; background:#4caf50; color:#fff; cursor:pointer; }
-  img, video, audio, iframe { max-width: 100%; border-radius: 8px; margin-top: 5px; }
+  body { background:#111; color:#eee; font-family:sans-serif; }
+  #chatMessages { max-width:600px; margin:20px auto; background:#222; padding:10px; height:300px; overflow-y:auto; border-radius:8px; }
+  .message { margin-bottom:10px; }
+  .message-user { font-weight:bold; color:#4caf50; }
+  .chat-input { max-width:600px; margin:10px auto; display:flex; gap:10px; }
+  .chat-input input[type=text] { flex:1; padding:8px; border-radius:6px; border:none; }
+  .chat-input input[type=file] { padding:8px; background:#333; color:#eee; border-radius:6px; }
+  .chat-input button { padding:8px 16px; border:none; border-radius:6px; background:#4caf50; color:#fff; cursor:pointer; }
+  img, video, audio, iframe { max-width:100%; border-radius:8px; margin-top:5px; }
 </style>
 </head>
 <body>
@@ -28,10 +28,11 @@
 
 <script>
 const textInput = document.getElementById('textInput');
+const fileInput = document.getElementById('fileInput');
 const sendBtn = document.getElementById('sendBtn');
+const chat = document.getElementById('chatMessages');
 
 sendBtn.addEventListener('click', sendMessage);
-
 textInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
     e.preventDefault();
@@ -41,11 +42,8 @@ textInput.addEventListener('keydown', e => {
 
 async function sendMessage() {
   const text = textInput.value.trim();
-  const fileInput = document.getElementById('fileInput');
   const file = fileInput.files[0];
-  const chat = document.getElementById('chatMessages');
-
-  if (!file && !text) return;
+  if (!text && !file) return;
 
   let embed = '';
 
@@ -54,30 +52,30 @@ async function sendMessage() {
     formData.append('file', file);
 
     try {
-      const res = await fetch('/upload', {
+      const res = await fetch('https://0x0.st', {
         method: 'POST',
         body: formData
       });
+      const url = await res.text();
 
-      const data = await res.json();
-      const url = data.url;
+      if (!url.startsWith('http')) throw new Error('Invalid response');
 
       const lower = url.toLowerCase();
 
       if (lower.match(/\.(jpg|jpeg|png|gif|webp|bmp)$/)) {
-        embed = `<img src="${url}" alt="image">`;
+        embed = `<img src="${url}" alt="img">`;
       } else if (lower.match(/\.(mp4|webm|ogg)$/)) {
         embed = `<video controls src="${url}"></video>`;
       } else if (lower.match(/\.(mp3|wav|ogg|flac)$/)) {
         embed = `<audio controls src="${url}"></audio>`;
-      } else if (lower.match(/\.(txt|log|json|md|lua|py|js|html|c|cpp|sh)$/)) {
-        embed = `<iframe src="${url}" style="width:100%;height:300px;background:#111;border:none;"></iframe>`;
+      } else if (lower.match(/\.(txt|log|md|json|js|lua|c|cpp|html)$/)) {
+        embed = `<iframe src="${url}" style="width:100%;height:300px;background:#000;border:none;"></iframe>`;
       } else {
-        embed = `<a href="${url}" target="_blank" rel="noopener noreferrer">📎 Download: ${url}</a>`;
+        embed = `<a href="${url}" target="_blank" rel="noopener noreferrer">📎 ${file.name}</a>`;
       }
 
     } catch (err) {
-      alert('Upload failed: ' + err.message);
+      alert("Upload failed: " + err.message);
       return;
     }
   }
