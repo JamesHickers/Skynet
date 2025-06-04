@@ -1,45 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Skynet DMs</title>
+  <style>
+    body { background: #111; color: #eee; font-family: sans-serif; font-size: 14px; }
+    #dmList { display: flex; gap: 10px; justify-content: center; margin: 10px 0; }
+    #chatMessagesContainer { margin-bottom: 20px; }
+    .chat-thread { display: none; max-width: 600px; margin: 0 auto; background: #222; padding: 10px; height: 300px; overflow-y: auto; border-radius: 8px; }
+    .message { margin-bottom: 10px; }
+    .message-user { font-weight: bold; color: #4caf50; }
+    .chat-input { max-width: 600px; margin: 0 auto; display: flex; gap: 10px; }
+    .chat-input input[type=text] { flex: 1; padding: 8px; border-radius: 6px; border: none; }
+    .chat-input input[type=file] { padding: 8px; background: #333; color: #eee; border-radius: 6px; }
+    .chat-input button { padding: 8px 16px; border: none; border-radius: 6px; background: #4caf50; color: #fff; cursor: pointer; }
+    img, video, audio, iframe { max-width: 100%; border-radius: 8px; margin-top: 5px; }
+    .profile-header { display: flex; align-items: center; gap: 10px; padding: 10px; background: #1a1a1a; border-radius: 8px; margin: 10px auto; max-width: 600px; }
+    .profile-header img { width: 40px; height: 40px; border-radius: 50%; }
+  </style>
+</head>
+<body>
+
+<div id="profileContainer"></div>
+<div id="dmList"></div>
+<div id="chatMessagesContainer"></div>
+
+<div class="chat-input">
+  <input type="text" id="textInput" placeholder="Send a DM..." />
+  <input type="file" id="fileInput" />
+  <button id="sendBtn">Send</button>
+</div>
+
 <script>
-const textInput = document.getElementById('textInput');
-const fileInput = document.getElementById('fileInput');
-const sendBtn = document.getElementById('sendBtn');
+let activeDM = null;
 const chatContainer = document.getElementById('chatMessagesContainer');
 const dmList = document.getElementById('dmList');
 
-let activeDM = null;
-const users = ['Allie', 'xqmvi2', 'Barney']; // Replace with actual usernames or load dynamically
-
-function createDMThread(username) {
-  const thread = document.createElement('div');
-  thread.id = `chatMessages-${username}`;
-  thread.className = 'chat-thread';
-  thread.style.display = 'none';
-  thread.style.maxWidth = '600px';
-  thread.style.margin = '20px auto';
-  thread.style.background = '#222';
-  thread.style.padding = '10px';
-  thread.style.height = '300px';
-  thread.style.overflowY = 'auto';
-  thread.style.borderRadius = '8px';
-  chatContainer.appendChild(thread);
-}
-
-function switchDM(username) {
-  if (activeDM) document.getElementById(`chatMessages-${activeDM}`).style.display = 'none';
-  activeDM = username;
-  document.getElementById(`chatMessages-${username}`).style.display = 'block';
-}
-
-users.forEach(username => {
-  createDMThread(username);
-  const btn = document.createElement('button');
-  btn.textContent = username;
-  btn.style.marginRight = '8px';
-  btn.onclick = () => switchDM(username);
-  dmList.appendChild(btn);
-});
-
-// Default DM thread
-switchDM(users[0]);
+const textInput = document.getElementById('textInput');
+const fileInput = document.getElementById('fileInput');
+const sendBtn = document.getElementById('sendBtn');
 
 sendBtn.addEventListener('click', sendMessage);
 textInput.addEventListener('keydown', e => {
@@ -48,6 +48,19 @@ textInput.addEventListener('keydown', e => {
     sendMessage();
   }
 });
+
+function createDMThread(username) {
+  const thread = document.createElement('div');
+  thread.id = `chatMessages-${username}`;
+  thread.className = 'chat-thread';
+  chatContainer.appendChild(thread);
+}
+
+function switchDM(username) {
+  if (activeDM) document.getElementById(`chatMessages-${activeDM}`).style.display = 'none';
+  activeDM = username;
+  document.getElementById(`chatMessages-${username}`).style.display = 'block';
+}
 
 async function sendMessage() {
   const text = textInput.value.trim();
@@ -101,5 +114,50 @@ async function sendMessage() {
   chat.scrollTop = chat.scrollHeight;
 }
 
-// settings.json and app_settings.json remain unchanged — they style the page globally
+// Load settings.json
+fetch('settings.json')
+  .then(res => {
+    if (!res.ok) throw new Error("Could not load settings.json");
+    return res.json();
+  })
+  .then(data => {
+    const user = data.user_account;
+
+    // Profile header
+    const profile = `
+      <div class="profile-header">
+        <img src="${user.avatar}" alt="Avatar" />
+        <div>
+          <div style="font-weight: bold; color: #4caf50;">
+            ${user.username}
+            <span style="font-size: 0.8em; color: ${user.status === 'online' ? '#0f0' : '#aaa'};">(${user.status})</span>
+          </div>
+          <div style="font-size: 0.9em; color: #ccc;">${user.bio}</div>
+        </div>
+      </div>
+    `;
+    document.getElementById('profileContainer').innerHTML = profile;
+
+    // DM Threads
+    user.contacts.forEach(username => {
+      createDMThread(username);
+      const btn = document.createElement('button');
+      btn.textContent = username;
+      btn.onclick = () => switchDM(username);
+      dmList.appendChild(btn);
+    });
+
+    // Set default active DM
+    if (user.contacts.length > 0) {
+      switchDM(user.contacts[0]);
+    }
+  })
+  .catch(error => {
+    console.error("Error loading settings:", error);
+    alert("Failed to load user settings.");
+  });
 </script>
+
+<script src="CORS.js"></script>
+</body>
+</html>
