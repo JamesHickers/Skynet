@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chat with File.io Upload</title>
+<style>
+  body { background:#222; color:#eee; font-family:sans-serif; }
+  #chatMessages { max-width: 600px; margin: 20px auto; background:#333; padding:10px; height:300px; overflow-y:auto; border-radius:8px; }
+  .message { margin-bottom: 10px; }
+  .message-user { font-weight: bold; color: #4caf50; }
+  .chat-input { max-width: 600px; margin: 10px auto; display: flex; gap: 10px; }
+  .chat-input input[type=text] { flex:1; padding: 8px; border-radius: 6px; border:none; }
+  .chat-input input[type=file] { padding: 8px; }
+  .chat-input button { padding: 8px 16px; border:none; border-radius: 6px; background:#4caf50; color:#fff; cursor:pointer; }
+  img, video, audio { max-width: 100%; border-radius: 8px; margin-top: 5px; }
+</style>
+</head>
+<body>
+
+<div id="chatMessages"></div>
+
+<div class="chat-input">
+  <input type="file" id="fileInput" accept="image/*,video/*,audio/*" />
+  <input type="text" id="textInput" placeholder="Type your message..." />
+  <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+async function sendMessage() {
+  const textInput = document.getElementById("textInput");
+  const fileInput = document.getElementById("fileInput");
+  const chat = document.getElementById("chatMessages");
+
+  const text = textInput.value.trim();
+  const file = fileInput.files[0];
+
+  if (!text && !file) return alert("Please enter a message or select a file.");
+
+  let messageHTML = `<div class="message"><span class="message-user">You</span>:`;
+
+  if (text) {
+    messageHTML += ` ${text}`;
+  }
+
+  if (file) {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("https://file.io/?expires=1d", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+      if (!data.success) throw new Error("Upload failed");
+
+      const link = data.link;
+      const ext = file.name.split('.').pop().toLowerCase();
+
+      if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'heif', 'avif'].includes(ext)) {
+        messageHTML += `<br><img src="${link}" alt="Image" />`;
+      } else if (['mp4', 'webm', 'mkv'].includes(ext)) {
+        messageHTML += `<br><video controls src="${link}"></video>`;
+      } else if (['mp3', 'aac', 'wav', 'ogg', 'he-aac'].includes(ext)) {
+        messageHTML += `<br><audio controls src="${link}"></audio>`;
+      } else {
+        messageHTML += `<br><a href="${link}" target="_blank">Download File</a>`;
+      }
+    } catch (error) {
+      alert("File upload failed: " + error.message);
+      if (!text) return;
+    }
+  }
+
+  messageHTML += `</div>`;
+  chat.insertAdjacentHTML("beforeend", messageHTML);
+
+  textInput.value = "";
+  fileInput.value = "";
+  chat.scrollTop = chat.scrollHeight;
+}
+</script>
+
+</body>
+</html>
