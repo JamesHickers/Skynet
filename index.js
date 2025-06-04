@@ -24,3 +24,21 @@ app.get('/spotify', (req, res) => {
 app.listen(port, () => {
     console.log('Skynet is online at port ' + port); // port is hardcoded cause... reasons
 });
+
+const multer = require('multer');
+const path = require('path');
+const upload = multer({ dest: 'uploads/' });
+
+app.post('/upload', upload.single('file'), (req, res) => {
+  const file = req.file;
+  const mimeType = file.mimetype;
+  const filename = `/uploads/${file.filename}`;
+
+  res.status(200).json({
+    filename,
+    mime_type: mimeType,
+    embed_url: filename
+  });
+});
+
+app.use('/uploads', express.static('uploads'));
