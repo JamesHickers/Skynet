@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Chat w/ tmpfiles Upload</title>
+  <title>Chat w/ tmpfiles Upload (GitHub Pages Fix)</title>
   <style>
     body { background: #111; color: #eee; font-family: sans-serif; }
     #chatMessages { max-width: 600px; margin: 20px auto; background: #222; padding: 10px; height: 300px; overflow-y: auto; border-radius: 8px; }
@@ -52,7 +52,7 @@ async function sendMessage() {
     formData.append('file', file);
 
     try {
-      const res = await fetch('https://tmpfiles.org/api/v1/upload', {
+      const res = await fetch('https://corsproxy.io/?https://tmpfiles.org/api/v1/upload', {
         method: 'POST',
         body: formData
       });
@@ -63,14 +63,15 @@ async function sendMessage() {
       const url = json.data.url;
       const lower = file.name.toLowerCase();
 
+      // Embed + direct link
       if (lower.match(/\.(jpg|jpeg|png|gif|webp|bmp)$/)) {
-        embed = `<img src="${url}" alt="image">`;
+        embed = `<div><a href="${url}" target="_blank">${url}</a><br><img src="${url}" alt="image"></div>`;
       } else if (lower.match(/\.(mp4|webm|ogg)$/)) {
-        embed = `<video controls src="${url}"></video>`;
+        embed = `<div><a href="${url}" target="_blank">${url}</a><br><video controls src="${url}"></video></div>`;
       } else if (lower.match(/\.(mp3|wav|ogg|flac)$/)) {
-        embed = `<audio controls src="${url}"></audio>`;
+        embed = `<div><a href="${url}" target="_blank">${url}</a><br><audio controls src="${url}"></audio></div>`;
       } else if (lower.match(/\.(txt|log|md|json|js|html|lua|cpp)$/)) {
-        embed = `<iframe src="${url}" style="width:100%;height:300px;background:#000;border:none;"></iframe>`;
+        embed = `<div><a href="${url}" target="_blank">${url}</a><br><iframe src="${url}" style="width:100%;height:300px;background:#000;border:none;"></iframe></div>`;
       } else {
         embed = `<a href="${url}" target="_blank" rel="noopener noreferrer">📎 ${file.name}</a>`;
       }
