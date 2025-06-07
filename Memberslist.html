@@ -82,41 +82,11 @@
 
     .main-panel {
       flex: 1;
-      padding: 30px;
-      overflow-y: auto;
-    }
-
-    .profile-card {
-      background-color: #292b2f;
-      border-radius: 10px;
-      padding: 20px;
-      max-width: 500px;
-      box-shadow: 0 0 10px #000;
-    }
-
-    .profile-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      margin-bottom: 15px;
-    }
-
-    .profile-name {
-      font-size: 1.4em;
-      font-weight: bold;
-      color: #4caf50;
-    }
-
-    .profile-bio {
-      font-size: 14px;
-      color: #ccc;
-      margin-top: 10px;
-    }
-
-    .profile-email {
-      font-size: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 16px;
       color: #888;
-      margin-top: 5px;
     }
   </style>
 </head>
@@ -135,9 +105,7 @@
   </div>
 
   <div class="main-panel">
-    <div id="profileView">
-      <p>Select a member to view their profile.</p>
-    </div>
+    <p>Select a member to open their DM.</p>
   </div>
 
   <script>
@@ -149,8 +117,9 @@
       allUsers.forEach(({ user_account: u }) => {
         if (filter !== 'all' && u.status !== filter) return;
 
-        const member = document.createElement('div');
+        const member = document.createElement('a');
         member.classList.add('member');
+        member.href = `dms.html?user=${encodeURIComponent(u.username)}`;
         member.innerHTML = `
           <img class="avatar" src="${u.avatar}" alt="${u.username}">
           <div class="member-info">
@@ -158,16 +127,6 @@
             <div class="status" style="color:${u.status === 'online' ? '#0f0' : '#888'}">${u.status}</div>
           </div>
         `;
-        member.addEventListener('click', () => {
-          document.getElementById('profileView').innerHTML = `
-            <div class="profile-card">
-              <img class="profile-avatar" src="${u.avatar}" alt="${u.username}">
-              <div class="profile-name">${u.username}</div>
-              <div class="profile-email">${u.email}</div>
-              <div class="profile-bio">${u.bio}</div>
-            </div>
-          `;
-        });
         list.appendChild(member);
       });
     }
@@ -183,7 +142,6 @@
       renderMembers(e.target.value);
     });
 
-    // Optional: Simulate live updates every 10s
     setInterval(() => {
       fetch('settings.json')
         .then(res => res.json())
