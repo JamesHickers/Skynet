@@ -3,162 +3,241 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="index, follow"> 
+  <meta name="robots" content="index, follow" />
+  <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">
   <title>Skynet DMs</title>
   <style>
-    body { background: #111; color: #eee; font-family: sans-serif; font-size: 14px; }
-    #dmList { display: flex; gap: 10px; justify-content: center; margin: 10px 0; }
-    #chatMessagesContainer { margin-bottom: 20px; }
-    .chat-thread { display: none; max-width: 600px; margin: 0 auto; background: #222; padding: 10px; height: 300px; overflow-y: auto; border-radius: 8px; }
-    .message { margin-bottom: 10px; }
-    .message-user { font-weight: bold; color: #4caf50; }
-    .chat-input { max-width: 600px; margin: 0 auto; display: flex; gap: 10px; }
-    .chat-input input[type=text] { flex: 1; padding: 8px; border-radius: 6px; border: none; }
-    .chat-input input[type=file] { padding: 8px; background: #333; color: #eee; border-radius: 6px; }
-    .chat-input button { padding: 8px 16px; border: none; border-radius: 6px; background: #4caf50; color: #fff; cursor: pointer; }
-    img, video, audio, iframe { max-width: 100%; border-radius: 8px; margin-top: 5px; }
-    .profile-header { display: flex; align-items: center; gap: 10px; padding: 10px; background: #1a1a1a; border-radius: 8px; margin: 10px auto; max-width: 600px; }
-    .profile-header img { width: 40px; height: 40px; border-radius: 50%; }
+    body {
+      background: #111;
+      color: #eee;
+      font-family: sans-serif;
+      font-size: 14px;
+      margin: 0;
+      padding: 0;
+    }
+
+    #profileContainer,
+    #dmList,
+    #chatMessagesContainer {
+      max-width: 600px;
+      margin: 10px auto;
+    }
+
+    #dmList {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .chat-thread {
+      display: none;
+      background: #222;
+      padding: 10px;
+      height: 300px;
+      overflow-y: auto;
+      border-radius: 8px;
+    }
+
+    .message {
+      margin-bottom: 10px;
+    }
+
+    .message-user {
+      font-weight: bold;
+      color: #4caf50;
+    }
+
+    .chat-input {
+      max-width: 600px;
+      margin: 0 auto 30px;
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .chat-input input[type="text"] {
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    .chat-input input[type="file"] {
+      padding: 8px;
+      background: #333;
+      color: #eee;
+      border-radius: 6px;
+      border: none;
+    }
+
+    .chat-input button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #4caf50;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    img,
+    video,
+    audio,
+    iframe {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 5px;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: #1a1a1a;
+      border-radius: 8px;
+    }
+
+    .profile-header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
   </style>
 </head>
 <body>
 
-<div id="profileContainer"></div>
-<div id="dmList"></div>
-<div id="chatMessagesContainer"></div>
+  <div id="profileContainer"></div>
+  <div id="dmList"></div>
+  <div id="chatMessagesContainer"></div>
 
-<div class="chat-input">
-  <input type="text" id="textInput" placeholder="Send a DM..." />
-  <input type="file" id="fileInput" />
-  <button id="sendBtn">Send</button>
-</div>
+  <div class="chat-input">
+    <input type="text" id="textInput" placeholder="Send a DM..." />
+    <input type="file" id="fileInput" />
+    <button id="sendBtn">Send</button>
+  </div>
 
-<script>
-let activeDM = null;
-const chatContainer = document.getElementById('chatMessagesContainer');
-const dmList = document.getElementById('dmList');
+  <script defer>
+    let activeDM = null;
+    const chatContainer = document.getElementById('chatMessagesContainer');
+    const dmList = document.getElementById('dmList');
+    const textInput = document.getElementById('textInput');
+    const fileInput = document.getElementById('fileInput');
+    const sendBtn = document.getElementById('sendBtn');
 
-const textInput = document.getElementById('textInput');
-const fileInput = document.getElementById('fileInput');
-const sendBtn = document.getElementById('sendBtn');
-
-sendBtn.addEventListener('click', sendMessage);
-textInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    sendMessage();
-  }
-});
-
-function createDMThread(username) {
-  const thread = document.createElement('div');
-  thread.id = `chatMessages-${username}`;
-  thread.className = 'chat-thread';
-  chatContainer.appendChild(thread);
-}
-
-function switchDM(username) {
-  if (activeDM) document.getElementById(`chatMessages-${activeDM}`).style.display = 'none';
-  activeDM = username;
-  document.getElementById(`chatMessages-${username}`).style.display = 'block';
-}
-
-async function sendMessage() {
-  const text = textInput.value.trim();
-  const file = fileInput.files[0];
-  if (!text && !file) return;
-
-  let embed = '';
-
-  if (file) {
-    const formData = new FormData();
-    formData.append('reqtype', 'fileupload');
-    formData.append('fileToUpload', file);
-
-    try {
-      const res = await fetch('https://catbox.moe/user/api.php', {
-        method: 'POST',
-        body: formData
-      });
-
-      const url = await res.text();
-      if (!url.startsWith('http')) throw new Error('Upload failed');
-
-      const lower = file.name.toLowerCase();
-
-      if (lower.match(/\.(jpe?g|png|gif|webp|bmp)$/)) {
-        embed = `<div><a href="${url}" target="_blank">${url}</a><br><img src="${url}" alt="image"></div>`;
-      } else if (lower.match(/\.(mp4|webm|ogg)$/)) {
-        embed = `<div><a href="${url}" target="_blank">${url}</a><br><video controls src="${url}"></video></div>`;
-      } else if (lower.match(/\.(mp3|wav|ogg|flac)$/)) {
-        embed = `<div><a href="${url}" target="_blank">${url}</a><br><audio controls src="${url}"></audio></div>`;
-      } else if (lower.match(/\.(txt|log|md|json|js|html|lua|cpp)$/)) {
-        embed = `<div><a href="${url}" target="_blank">${url}</a><br><iframe src="${url}" style="width:100%;height:300px;background:#000;border:none;"></iframe></div>`;
-      } else {
-        embed = `<a href="${url}" target="_blank" rel="noopener noreferrer">📎 ${file.name}</a>`;
+    sendBtn.addEventListener('click', sendMessage);
+    textInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
       }
-
-    } catch (err) {
-      alert("Upload failed: " + err.message);
-      return;
-    }
-  }
-
-  const chat = document.getElementById(`chatMessages-${activeDM}`);
-  let messageHTML = '';
-  if (text) messageHTML += `<div class="message"><span class="message-user">You</span>: ${text}</div>`;
-  if (embed) messageHTML += `<div class="message"><span class="message-user">You</span>: ${embed}</div>`;
-  chat.insertAdjacentHTML('beforeend', messageHTML);
-
-  textInput.value = '';
-  fileInput.value = '';
-  chat.scrollTop = chat.scrollHeight;
-}
-
-// Load settings.json
-fetch('settings.json')
-  .then(res => {
-    if (!res.ok) throw new Error("Could not load settings.json");
-    return res.json();
-  })
-  .then(data => {
-    const user = data.user_account;
-
-    // Profile header
-    const profile = `
-      <div class="profile-header">
-        <img src="${user.avatar}" alt="Avatar" />
-        <div>
-          <div style="font-weight: bold; color: #4caf50;">
-            ${user.username}
-            <span style="font-size: 0.8em; color: ${user.status === 'online' ? '#0f0' : '#aaa'};">(${user.status})</span>
-          </div>
-          <div style="font-size: 0.9em; color: #ccc;">${user.bio}</div>
-        </div>
-      </div>
-    `;
-    document.getElementById('profileContainer').innerHTML = profile;
-
-    // DM Threads
-    user.contacts.forEach(username => {
-      createDMThread(username);
-      const btn = document.createElement('button');
-      btn.textContent = username;
-      btn.onclick = () => switchDM(username);
-      dmList.appendChild(btn);
     });
 
-    // Set default active DM
-    if (user.contacts.length > 0) {
-      switchDM(user.contacts[0]);
+    function createDMThread(username) {
+      const thread = document.createElement('div');
+      thread.id = `chatMessages-${username}`;
+      thread.className = 'chat-thread';
+      chatContainer.appendChild(thread);
     }
-  })
-  .catch(error => {
-    console.error("Error loading settings:", error);
-    alert("Failed to load user settings.");
-  });
-</script>
 
-<script src="CORS.js"></script>
+    function switchDM(username) {
+      if (activeDM) {
+        document.getElementById(`chatMessages-${activeDM}`).style.display = 'none';
+      }
+      activeDM = username;
+      document.getElementById(`chatMessages-${username}`).style.display = 'block';
+    }
+
+    async function sendMessage() {
+      const text = textInput.value.trim();
+      const file = fileInput.files[0];
+      if (!text && !file) return;
+
+      let embed = '';
+
+      if (file) {
+        const formData = new FormData();
+        formData.append('reqtype', 'fileupload');
+        formData.append('fileToUpload', file);
+
+        try {
+          const res = await fetch('https://catbox.moe/user/api.php', {
+            method: 'POST',
+            body: formData
+          });
+
+          const url = await res.text();
+          if (!url.startsWith('http')) throw new Error('Upload failed');
+
+          const lower = file.name.toLowerCase();
+
+          if (/\.(jpe?g|png|gif|webp|bmp)$/.test(lower)) {
+            embed = `<div><a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a><br><img src="${url}" alt="image"></div>`;
+          } else if (/\.(mp4|webm|ogg)$/.test(lower)) {
+            embed = `<div><a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a><br><video controls src="${url}"></video></div>`;
+          } else if (/\.(mp3|wav|ogg|flac)$/.test(lower)) {
+            embed = `<div><a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a><br><audio controls src="${url}"></audio></div>`;
+          } else if (/\.(txt|log|md|json|js|html|lua|cpp)$/.test(lower)) {
+            embed = `<div><a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a><br><iframe src="${url}" style="width:100%;height:300px;background:#000;border:none;"></iframe></div>`;
+          } else {
+            embed = `<a href="${url}" target="_blank" rel="noopener noreferrer">📎 ${file.name}</a>`;
+          }
+        } catch (err) {
+          alert("Upload failed: " + err.message);
+          return;
+        }
+      }
+
+      const chat = document.getElementById(`chatMessages-${activeDM}`);
+      let messageHTML = '';
+      if (text) messageHTML += `<div class="message"><span class="message-user">You</span>: ${text}</div>`;
+      if (embed) messageHTML += `<div class="message"><span class="message-user">You</span>: ${embed}</div>`;
+      chat.insertAdjacentHTML('beforeend', messageHTML);
+
+      textInput.value = '';
+      fileInput.value = '';
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    fetch('settings.json')
+      .then(res => {
+        if (!res.ok) throw new Error("Could not load settings.json");
+        return res.json();
+      })
+      .then(data => {
+        const user = data.user_account;
+
+        const profile = `
+          <div class="profile-header">
+            <img src="${user.avatar}" alt="Avatar" />
+            <div>
+              <div style="font-weight: bold; color: #4caf50;">
+                ${user.username}
+                <span style="font-size: 0.8em; color: ${user.status === 'online' ? '#0f0' : '#aaa'};">(${user.status})</span>
+              </div>
+              <div style="font-size: 0.9em; color: #ccc;">${user.bio}</div>
+            </div>
+          </div>
+        `;
+        document.getElementById('profileContainer').innerHTML = profile;
+
+        user.contacts.forEach(username => {
+          createDMThread(username);
+          const btn = document.createElement('button');
+          btn.textContent = username;
+          btn.onclick = () => switchDM(username);
+          dmList.appendChild(btn);
+        });
+
+        if (user.contacts.length > 0) {
+          switchDM(user.contacts[0]);
+        }
+      })
+      .catch(error => {
+        console.error("Error loading settings:", error);
+        alert("Failed to load user settings.");
+      });
+  </script>
+  <script src="CORS.js" defer></script>
 </body>
 </html>
