@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
   var installBtn = document.getElementById("installBtn");
 
-  var downloadURL = ""; // download url (*/ω＼*)
+  var downloadURL = "https://example.com/Skynet.exe"; // download url (*/ω＼*)
 
   if (installBtn) {
     installBtn.addEventListener("click", function() {
