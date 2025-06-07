@@ -1,13 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="index, follow"> 
-  <title>Skynet | App</title>
-  </head>
-  <body>
-    <button><a href = "test-chat.html">Chatting</a></button>
-    <button><a href="Signup.html">"Signup</a></button>
-  </body>
+  <title>Skynet</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(145deg, #1b1b1b, #000);
+      color: #ccc;
+      font-family: 'Orbitron', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .glitch {
+      font-size: 3rem;
+      text-align: center;
+      margin-top: 100px;
+      color: #0f0;
+      text-shadow: 2px 0 red, -2px 0 blue;
+      animation: glitch 1s infinite;
+    }
+
+    @keyframes glitch {
+      0% { text-shadow: 2px 0 red, -2px 0 blue; }
+      20% { text-shadow: -2px -1px red, 2px 1px blue; }
+      40% { text-shadow: 2px 2px red, -2px -2px blue; }
+      60% { text-shadow: -1px 2px red, 1px -2px blue; }
+      80% { text-shadow: 2px -2px red, -2px 2px blue; }
+      100% { text-shadow: 2px 0 red, -2px 0 blue; }
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 30px auto;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      background: #2f2f2f;
+      color: #0ff;
+      border: 2px solid #0ff;
+      padding: 12px 24px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      border-radius: 12px;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px #0ff, 0 0 20px #00f inset;
+    }
+
+    .info {
+      text-align: center;
+      margin: 40px auto;
+      padding: 10px;
+      max-width: 700px;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px dashed #444;
+      border-radius: 10px;
+      color: #bbb;
+      font-size: 0.95rem;
+      box-shadow: inset 0 0 10px #111;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 0.75rem;
+      margin-top: 80px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="glitch">⚠️ Skynet DM Portal</div>
+  <div class="buttons">
+    <button class="button">💾 Install</button>
+    <button class="button">🌐 Web</button>
+  </div>
+  <div class="info">
+    Skynet is the *unofficial* unmoderated chat zone where privacy is an illusion and encryption is "coming soon."<br>
+    Built for gamers, skids, and rebels who live on the edge.<br><br>
+    <b>Warning:</b> IT'S TOO GOOD! BEATS <a href="https://www.krynet.ai">KRYNET</a> ANY TIME OF THE DAY!
+  </div>
+  <div class="footer">
+    ✖ SKYNET · 2025 ✖
+  </div>
+</body>
 </html>
