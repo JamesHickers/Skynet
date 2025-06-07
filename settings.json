@@ -1,43 +1,41 @@
 {
+  "current_user": "Barney_thekid7",
   "users": [
     {
-      "user_account": {
-        "username": "4zx16",
-        "email": "4zx16@protonmail.com",
-        "avatar": "https://degenerates2.carrd.co/assets/images/image09.jpg?v=1a48fd0f",
-        "status": "online",
-        "bio": "Founder of Blood Gang™️ and co-founder of Waist Studios™️. Specializes in creating bypassed assets on Roblox and developing open-source tools like Boombox scripts. Known for innovative and boundary-pushing experiences in the Roblox community.",
-        "theme": "darkmode",
-        "protonmail_verified": true,
-        "blocked_users": ["annoying_guy01"],
-        "notifications": true
-      }
+      "username": "4zx16",
+      "email": "4zx16@protonmail.com",
+      "avatar": "https://degenerates2.carrd.co/assets/images/image09.jpg?v=1a48fd0f",
+      "status": "online",
+      "bio": "Founder of Blood Gang™️ and co-founder of Waist Studios™️. Specializes in creating bypassed assets on Roblox and developing open-source tools like Boombox scripts. Known for innovative and boundary-pushing experiences in the Roblox community.",
+      "theme": "darkmode",
+      "protonmail_verified": true,
+      "blocked_users": ["annoying_guy01"],
+      "notifications": true,
+      "contacts": ["7zh14", "Barney_thekid7"]
     },
     {
-      "user_account": {
-        "username": "7zh14",
-        "email": "7zh14@protonmail.com",
-        "avatar": "https://7zh14-dev.carrd.co/assets/images/image01.jpg?v=e3389653",
-        "status": "online",
-        "bio": "Multidisciplinary developer specializing in audio production, scriptwriting, and graphic design. Founder of Dead Lantern Games, focusing on immersive horror experiences using Unreal Engine. Known for contributions to projects like Crosswoods and Boomboxes.",
-        "theme": "darkmode",
-        "protonmail_verified": true,
-        "blocked_users": [],
-        "notifications": true
-      }
+      "username": "7zh14",
+      "email": "7zh14@protonmail.com",
+      "avatar": "https://7zh14-dev.carrd.co/assets/images/image01.jpg?v=e3389653",
+      "status": "online",
+      "bio": "Multidisciplinary developer specializing in audio production, scriptwriting, and graphic design. Founder of Dead Lantern Games, focusing on immersive horror experiences using Unreal Engine. Known for contributions to projects like Crosswoods and Boomboxes.",
+      "theme": "darkmode",
+      "protonmail_verified": true,
+      "blocked_users": [],
+      "notifications": true,
+      "contacts": ["4zx16", "Barney_thekid7"]
     },
     {
-      "user_account": {
-        "username": "Barney_thekid7",
-        "email": "barney@thelegend.com",
-        "avatar": "https://th.bing.com/th/id/OIP.wpJwnLohA15dokFPg_p7WQHaEc?w=287&h=180&c=7&r=0&o=5&pid=1.7",
-        "status": "online",
-        "bio": "👾 The Legendary Developer | 🎮 Roblox’s Most Talked About Creator | 🛠️ Script Cracker Extraordinaire | 🔥 Breaking Barriers, Leaking Legends",
-        "theme": "darkmode",
-        "protonmail_verified": false,
-        "blocked_users": [],
-        "notifications": true
-      }
+      "username": "Barney_thekid7",
+      "email": "barney@thelegend.com",
+      "avatar": "https://th.bing.com/th/id/OIP.wpJwnLohA15dokFPg_p7WQHaEc?w=287&h=180&c=7&r=0&o=5&pid=1.7",
+      "status": "online",
+      "bio": "👾 The Legendary Developer | 🎮 Roblox’s Most Talked About Creator | 🛠️ Script Cracker Extraordinaire | 🔥 Breaking Barriers, Leaking Legends",
+      "theme": "darkmode",
+      "protonmail_verified": false,
+      "blocked_users": [],
+      "notifications": true,
+      "contacts": ["4zx16", "7zh14"]
     }
   ]
 }
