@@ -203,7 +203,9 @@ const messageData = {
   timestamp: new Date().toISOString()
 };
 
-const chatKey = `dm-${user.username}-${activeDM}`;
+const key1 = `dm-${user.username}-${activeDM}`;
+const key2 = `dm-${activeDM}-${user.username}`;
+const chatKey = localStorage.getItem(key1) !== null ? key1 : key2;
 const messages = JSON.parse(localStorage.getItem(chatKey) || '[]');
 messages.push(messageData);
 localStorage.setItem(chatKey, JSON.stringify(messages));
