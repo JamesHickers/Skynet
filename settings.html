@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Skynet Settings</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    body {
+      background: #111;
+      color: #eee;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #4caf50;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+      font-weight: bold;
+      color: #ccc;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 6px;
+      border: none;
+      background: #222;
+      color: #eee;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
+    }
+
+    .danger {
+      background: #e53935;
+      margin-top: 10px;
+    }
+
+    .avatar-preview {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin-top: 10px;
+    }
+
+    hr {
+      border: 1px solid #333;
+      margin: 30px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>⚙️ Skynet User Settings</h1>
+
+  <label>Display Name</label>
+  <input type="text" id="username" placeholder="Enter username">
+
+  <label>Upload Avatar</label>
+  <input type="file" id="avatarFile" accept="image/*">
+  <img id="avatarPreview" class="avatar-preview" src="" alt="Avatar preview">
+
+  <label>Status</label>
+  <select id="status">
+    <option value="online">Online</option>
+    <option value="offline">Offline</option>
+    <option value="busy">Busy</option>
+    <option value="away">Away</option>
+  </select>
+
+  <label>Bio</label>
+  <textarea id="bio" rows="4" placeholder="Tell us about yourself..."></textarea>
+
+  <label>Theme</label>
+  <select id="theme">
+    <option value="darkmode">Dark Mode</option>
+    <option value="lightmode">Light Mode</option>
+  </select>
+
+  <hr />
+
+  <label>Change Password</label>
+  <input type="password" id="newPassword" placeholder="New password">
+
+  <button onclick="saveSettings()">💾 Save Settings</button>
+  <button onclick="logout()">🚪 Log Out</button>
+  <button class="danger" onclick="deleteAccount()">🗑️ Delete Account</button>
+
+  <script>
+    const usernameInput = document.getElementById('username');
+    const avatarFileInput = document.getElementById('avatarFile');
+    const avatarPreview = document.getElementById('avatarPreview');
+    const statusInput = document.getElementById('status');
+    const bioInput = document.getElementById('bio');
+    const themeInput = document.getElementById('theme');
+    const newPasswordInput = document.getElementById('newPassword');
+
+    let currentUser;
+
+    // 🔒 Require login
+    const settings = JSON.parse(localStorage.getItem('skynetSettings') || '{}');
+    if (!settings.user_account) {
+      alert("You must be logged in.");
+      window.location.href = "login.html";
+    } else {
+      currentUser = settings.user_account;
+    }
+
+    // Load values
+    usernameInput.value = currentUser.username || '';
+    avatarPreview.src = currentUser.avatar || '';
+    statusInput.value = currentUser.status || 'online';
+    bioInput.value = currentUser.bio || '';
+    themeInput.value = currentUser.theme || 'darkmode';
+
+    avatarFileInput.addEventListener('change', function () {
+      const file = this.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          avatarPreview.src = reader.result;
+          currentUser.avatar = reader.result; // Set base64 as avatar
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function saveSettings() {
+      const updatedUser = {
+        ...currentUser,
+        username: usernameInput.value.trim(),
+        avatar: avatarPreview.src,
+        status: statusInput.value,
+        bio: bioInput.value.trim(),
+        theme: themeInput.value,
+      };
+
+      const newPassword = newPasswordInput.value.trim();
+      if (newPassword) {
+        updatedUser.password = newPassword;
+      }
+
+      localStorage.setItem('skynetSettings', JSON.stringify({ user_account: updatedUser }));
+
+      // Update in skynetUsers
+      const allUsers = JSON.parse(localStorage.getItem('skynetUsers') || '[]');
+      const index = allUsers.findIndex(u => u.user_account.username === currentUser.username);
+      if (index !== -1) {
+        allUsers[index].user_account = updatedUser;
+        localStorage.setItem('skynetUsers', JSON.stringify(allUsers));
+      }
+
+      alert("✅ Settings saved!");
+      location.reload();
+    }
+
+    function logout() {
+      localStorage.removeItem('skynetSettings');
+      window.location.href = "login.html";
+    }
+
+    function deleteAccount() {
+      const confirmDelete = confirm("Are you sure? This will delete your account permanently.");
+      if (!confirmDelete) return;
+
+      const allUsers = JSON.parse(localStorage.getItem('skynetUsers') || '[]');
+      const updatedUsers = allUsers.filter(u => u.user_account.username !== currentUser.username);
+      localStorage.setItem('skynetUsers', JSON.stringify(updatedUsers));
+      localStorage.removeItem('skynetSettings');
+      alert("🗑️ Account deleted.");
+      window.location.href = "register.html";
+    }
+  </script>
+</body>
+</html>
