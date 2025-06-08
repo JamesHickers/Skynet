@@ -68,7 +68,7 @@
     try {
      const users = JSON.parse(localStorage.getItem('skynetUsers') || '{}');
 const user = users[email];
-
+  }
 if (!user) {
   response.style.color = 'red';
   response.textContent = 'User not found.';
