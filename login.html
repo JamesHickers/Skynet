@@ -66,10 +66,20 @@
     const password = form.password.value;
 
     try {
-      const res = await fetch('settings.json');
-      const data = await res.json();
+     const users = JSON.parse(localStorage.getItem('skynetUsers') || '{}');
+const user = users[email];
 
-      const user = data.users.find(u => u.email.toLowerCase() === email);
+if (!user) {
+  response.style.color = 'red';
+  response.textContent = 'User not found.';
+  return;
+}
+
+if (user.password !== password) {
+  response.style.color = 'red';
+  response.textContent = 'Incorrect password.';
+  return;
+}
       if (!user) {
         response.style.color = 'red';
         response.textContent = 'User not found.';
