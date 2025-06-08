@@ -1,178 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Skynet BABY BOY!!!</title>
-  <meta name="robots" content="index, follow"> 
+  <meta charset="UTF-8">
+  <title>Skynet – Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
   <style>
-    body { background: #111; color: #eee; font-family: sans-serif; }
-    #chatMessages { max-width: 600px; margin: 20px auto; background: #222; padding: 10px; height: 300px; overflow-y: auto; border-radius: 8px; }
-    .message { margin-bottom: 10px; }
-    .message-user { font-weight: bold; color: #4caf50; }
-    .chat-input { max-width: 600px; margin: 10px auto; display: flex; gap: 10px; }
-    .chat-input input[type=text] { flex: 1; padding: 8px; border-radius: 6px; border: none; }
-    .chat-input input[type=file] { padding: 8px; background: #333; color: #eee; border-radius: 6px; }
-    .chat-input button { padding: 8px 16px; border: none; border-radius: 6px; background: #4caf50; color: #fff; cursor: pointer; }
-    img, video, audio, iframe { max-width: 100%; border-radius: 8px; margin-top: 5px; }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #1e1e1e;
+      color: #ddd;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .servers {
+      width: 72px;
+      background: #202225;
+      padding: 10px 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .server {
+      width: 48px;
+      height: 48px;
+      margin: 10px 0;
+      border-radius: 50%;
+      background: #36393f;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      font-weight: bold;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .sidebar {
+      width: 280px;
+      background: #2c2f33;
+      padding: 20px 10px;
+      overflow-y: auto;
+    }
+    .sidebar h2 {
+      color: #fff;
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+    }
+    .member {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .member:hover {
+      background: #3a3f47;
+    }
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    .member-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .username {
+      color: #fff;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .status {
+      font-size: 12px;
+      color: #aaa;
+    }
+    .main-panel {
+      flex: 1;
+      background: #313338;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 16px;
+      color: #888;
+    }
+    .user-card {
+      position: fixed;
+      bottom: 10px;
+      left: 72px;
+      width: 260px;
+      background: #292b2f;
+      padding: 10px;
+      border-top: 1px solid #444;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .user-card img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+    }
+    .user-card span {
+      font-size: 14px;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
+  <div class="servers">
+    <div class="server" title="Server 1">S1</div>
+    <div class="server" title="Server 2">S2</div>
+    <div class="server" title="Server 3">S3</div>
+  </div>
 
-<div id="chatMessages"></div>
+  <div class="sidebar">
+    <h2>👥 Friends List</h2>
+    <div id="memberList"></div>
+  </div>
 
-<div class="chat-input">
-  <input type="text" id="textInput" placeholder="Send a message..." />
-  <input type="file" id="fileInput" />
-  <button id="sendBtn">Send</button>
-</div>
-<script>
-const textInput = document.getElementById('textInput');
-const fileInput = document.getElementById('fileInput');
-const sendBtn = document.getElementById('sendBtn');
-const chat = document.getElementById('chatMessages');
+  <div class="main-panel">
+    <p>Select a friend to DM.</p>
+  </div>
 
-sendBtn.addEventListener('click', sendMessage);
-textInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    sendMessage();
-  }
-});
+  <div class="user-card" id="currentUserCard">
+    <img src="" id="userAvatar" alt="Avatar">
+    <span id="userName"></span>
+  </div>
 
-async function sendMessage() {
-  const text = textInput.value.trim();
-  const file = fileInput.files[0];
-  if (!text && !file) return;
+  <script>
+    const settings = JSON.parse(localStorage.getItem('skynetSettings') || '{}');
+    const currentUser = settings.user_account;
+    const allUsers = JSON.parse(localStorage.getItem('skynetUsers') || '[]');
+    const memberList = document.getElementById('memberList');
+    const userName = document.getElementById('userName');
+    const userAvatar = document.getElementById('userAvatar');
 
-  let embed = '';
-
-  if (file) {
-    const formData = new FormData();
-    formData.append('reqtype', 'fileupload');
-    formData.append('fileToUpload', file);
-
-    try {
-      const res = await fetch('https://catbox.moe/user/api.php', {
-        method: 'POST',
-        body: formData
-      });
-
-      const url = await res.text();
-      if (!url.startsWith('http')) throw new Error('Upload failed');
-
-      const lower = file.name.toLowerCase();
-
-      if (lower.match(/\.(jpe?g|png|gif|webp|bmp)$/)) {
-        embed = `<div><a href="${url}" target="_blank">${url}</a><br><img src="${url}" alt="image"></div>`;
-      } else if (lower.match(/\.(mp4|webm|ogg)$/)) {
-        embed = `<div><a href="${url}" target="_blank">${url}</a><br><video controls src="${url}"></video></div>`;
-      } else if (lower.match(/\.(mp3|wav|ogg|flac)$/)) {
-        embed = `<div><a href="${url}" target="_blank">${url}</a><br><audio controls src="${url}"></audio></div>`;
-      } else if (lower.match(/\.(txt|log|md|json|js|html|lua|cpp)$/)) {
-        embed = `<div><a href="${url}" target="_blank">${url}</a><br><iframe src="${url}" style="width:100%;height:300px;background:#000;border:none;"></iframe></div>`;
-      } else {
-        embed = `<a href="${url}" target="_blank" rel="noopener noreferrer">📎 ${file.name}</a>`;
-      }
-
-    } catch (err) {
-      alert("Upload failed: " + err.message);
-      return;
-    }
-  }
-
-  let messageHTML = '';
-  if (text) messageHTML += `<div class="message"><span class="message-user">You</span>: ${text}</div>`;
-  if (embed) messageHTML += `<div class="message"><span class="message-user">You</span>: ${embed}</div>`;
-
-  chat.insertAdjacentHTML('beforeend', messageHTML);
-
-  textInput.value = '';
-  fileInput.value = '';
-  chat.scrollTop = chat.scrollHeight;
-}
-fetch('settings.json')
-  .then(response => {
-    if (!response.ok) throw new Error("Could not load settings.json");
-    return response.json();
-  })
-  .then(data => {
-    const user = data.user_account;
-
-    // Apply theme
-    if (user.theme === "darkmode") {
-      document.body.style.backgroundColor = "#111";
-      document.body.style.color = "#eee";
+    if (!currentUser) {
+      alert('Not logged in. Redirecting...');
+      window.location.href = 'login.html';
     } else {
-      document.body.style.backgroundColor = "#fff";
-      document.body.style.color = "#000";
+      userName.textContent = currentUser.username;
+      userAvatar.src = currentUser.avatar;
     }
 
-    // Add profile header
-    const profile = `
-      <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #1a1a1a; border-radius: 8px; margin-bottom: 10px;">
-        <img src="${user.avatar}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%;" />
-        <div>
-          <div style="font-weight: bold; color: #4caf50;">
-            ${user.username}
-            <span style="font-size: 0.8em; color: ${user.status === 'online' ? '#0f0' : '#aaa'};">(${user.status})</span>
+    function renderMembers() {
+      memberList.innerHTML = '';
+      allUsers.forEach(({ user_account: user }) => {
+        if (user.username === currentUser.username) return;
+
+        const member = document.createElement('div');
+        member.className = 'member';
+        member.onclick = () => {
+          window.location.href = `dms.html?user=${encodeURIComponent(user.username)}`;
+        };
+        member.innerHTML = `
+          <img class="avatar" src="${user.avatar}" alt="${user.username}" />
+          <div class="member-info">
+            <div class="username">${user.username}</div>
+            <div class="status" style="color: ${user.status === 'online' ? '#0f0' : '#888'}">${user.status}</div>
           </div>
-          <div style="font-size: 0.9em; color: #ccc;">${user.bio}</div>
-        </div>
-      </div>
-    `;
-
-    document.getElementById('chatMessages').insertAdjacentHTML('afterbegin', profile);
-  })
-  .catch(error => {
-    console.error("Error loading settings:", error);
-    alert("Failed to load user settings.");
-  });
-</script>
-<script>
-fetch('app_settings.json')
-  .then(response => {
-    if (!response.ok) throw new Error("Could not load app_settings.json");
-    return response.json();
-  })
-  .then(app => {
-    // Font size
-    document.body.style.fontSize = `${app.font_size}px`;
-
-    // Language (future use, e.g., localization)
-    document.documentElement.lang = app.language;
-
-    // Timestamps
-    if (app.show_timestamps) {
-      // You can later hook this into messages like:
-      // <span class="timestamp">[14:32]</span>
-      console.log("Timestamps are enabled");
+        `;
+        memberList.appendChild(member);
+      });
     }
-
-    // Notifications
-    if (app.notifications && !app.do_not_disturb) {
-      console.log("🔔 Notifications enabled");
-    }
-
-    // Theme override
-    if (app.theme === 'dark') {
-      document.body.style.backgroundColor = '#111';
-      document.body.style.color = '#eee';
-    } else {
-      document.body.style.backgroundColor = '#fff';
-      document.body.style.color = '#000';
-    }
-
-    // Optional: Custom background logic
-    if (app.custom_background) {
-      document.body.style.backgroundImage = "url('background.jpg')"; // example
-    }
-  })
-  .catch(err => {
-    console.error("Error loading app settings:", err);
-    alert("Couldn't load app_settings.json");
-  });
-</script>
-<script src="CORS.js"></script>
+    renderMembers();
+  </script>
 </body>
 </html>
