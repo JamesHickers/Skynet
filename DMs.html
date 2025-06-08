@@ -193,6 +193,17 @@ async function sendMessage() {
   if (text) messageHTML += `<div class="message"><span class="message-user">You</span>: ${text}</div>`;
   if (embed) messageHTML += `<div class="message"><span class="message-user">You</span>: ${embed}</div>`;
   chat.insertAdjacentHTML('beforeend', messageHTML);
+const messageData = {
+  sender: user.username,
+  text,
+  embed,
+  timestamp: new Date().toISOString()
+};
+
+const chatKey = `dm-${user.username}-${activeDM}`;
+const messages = JSON.parse(localStorage.getItem(chatKey) || '[]');
+messages.push(messageData);
+localStorage.setItem(chatKey, JSON.stringify(messages));
 
   textInput.value = '';
   fileInput.value = '';
