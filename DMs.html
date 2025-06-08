@@ -199,10 +199,30 @@
       chat.scrollTop = chat.scrollHeight;
     }
 
-    fetch('settings.json')
-      .then(res => {
-        if (!res.ok) throw new Error("Could not load settings.json");
-        return res.json();
+const settings = JSON.parse(localStorage.getItem('skynetSettings') || '{}');
+const user = settings.user_account;
+
+if (user) {
+  document.body.style.backgroundColor = user.theme === 'darkmode' ? '#111' : '#fff';
+  document.body.style.color = user.theme === 'darkmode' ? '#eee' : '#000';
+
+  const profile = `
+    <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #1a1a1a; border-radius: 8px; margin-bottom: 10px;">
+      <img src="${user.avatar}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%;" />
+      <div>
+        <div style="font-weight: bold; color: #4caf50;">
+          ${user.username}
+          <span style="font-size: 0.8em; color: ${user.status === 'online' ? '#0f0' : '#aaa'};">(${user.status})</span>
+        </div>
+        <div style="font-size: 0.9em; color: #ccc;">${user.bio}</div>
+      </div>
+    </div>
+  `;
+  document.getElementById('chatMessages').insertAdjacentHTML('afterbegin', profile);
+} else {
+  alert("No user found. Please log in.");
+  window.location.href = "login.html";
+}
       })
       .then(data => {
         const user = data.user_account;
