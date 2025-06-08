@@ -55,64 +55,63 @@
     </form>
     <div id="loginResponse"></div>
   </div>
-<script>
-  const form = document.getElementById('loginForm');
-  const response = document.getElementById('loginResponse');
 
-  form.addEventListener('submit', async e => {
-    e.preventDefault();
+  <script>
+    const form = document.getElementById('loginForm');
+    const response = document.getElementById('loginResponse');
 
-    const email = form.email.value.trim().toLowerCase();
-    const password = form.password.value;
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
 
-    try {
-     const users = JSON.parse(localStorage.getItem('skynetUsers') || '{}');
-const user = users[email];
-  }
-if (!user) {
-  response.style.color = 'red';
-  response.textContent = 'User not found.';
-  return;
-}
+      const email = form.email.value.trim().toLowerCase();
+      const password = form.password.value;
 
-if (user.password !== password) {
-  response.style.color = 'red';
-  response.textContent = 'Incorrect password.';
-  return;
-}
-      if (!user) {
-        response.style.color = 'red';
-        response.textContent = 'User not found.';
-        return;
-      }
+      try {
+        const users = JSON.parse(localStorage.getItem('skynetUsers') || '{}');
+        const user = users[email];
 
-      // NOTE: Add real password check if you store it (this version skips password for simplicity)
-      if (!email.endsWith('@protonmail.com') && user.protonmail_verified) {
-        response.style.color = 'orange';
-        response.textContent = 'Must use a ProtonMail email.';
-        return;
-      }
-
-      // Save user session
-      const session = {
-        user_account: {
-          username: user.username,
-          avatar: user.avatar,
-          status: user.status,
-          bio: user.bio,
-          theme: user.theme,
-          notifications: user.notifications
+        if (!user) {
+          response.style.color = 'red';
+          response.textContent = 'User not found.';
+          return;
         }
-      };
-      localStorage.setItem('skynetSettings', JSON.stringify(session));
 
-      window.location.href = 'test-chat.html';
-    } catch (err) {
-      console.error(err);
-      response.style.color = 'red';
-      response.textContent = 'Login failed. Could not load settings.';
-    }
-  });
-</script>
+        if (user.password !== password) {
+          response.style.color = 'red';
+          response.textContent = 'Incorrect password.';
+          return;
+        }
+
+        // Optional: Enforce ProtonMail domain
+        if (!email.endsWith('@protonmail.com')) {
+          response.style.color = 'orange';
+          response.textContent = 'Must use a ProtonMail email.';
+          return;
+        }
+
+        // Save login session
+        const session = {
+          user_account: {
+            username: user.username,
+            avatar: user.avatar,
+            status: user.status || 'online',
+            bio: user.bio || '',
+            theme: user.theme || 'darkmode',
+            notifications: user.notifications || true,
+            contacts: user.contacts || [] // crucial for DMs
+          }
+        };
+
+        localStorage.setItem('skynetSettings', JSON.stringify(session));
+
+        // Redirect to DM/chat page
+        window.location.href = 'test-chat.html';
+      } catch (err) {
+        console.error(err);
+        response.style.color = 'red';
+        response.textContent = 'Login failed. Could not load settings.';
+      }
+    });
+  </script>
 </body>
 </html>
