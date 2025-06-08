@@ -93,28 +93,40 @@
     <footer>© 2025 Skynet. Totally original. Definitely not a fork.</footer>
   </div>
 
-  <script>
-    const form = document.getElementById('signupForm');
-    const response = document.getElementById('response');
+<script>
+  const form = document.getElementById('signupForm');
+  const response = document.getElementById('response');
 
-    form.addEventListener('submit', e => {
-      e.preventDefault();
+  form.addEventListener('submit', e => {
+    e.preventDefault();
 
-      const username = form.username.value.trim();
-      const email = form.email.value.trim().toLowerCase();
-      const password = form.password.value;
+    const username = form.username.value.trim();
+    const email = form.email.value.trim().toLowerCase();
+    const password = form.password.value;
 
-      if (!email.endsWith('@protonmail.com')) {
-        response.style.color = 'red';
-        response.textContent = 'Error: Must use a ProtonMail email.';
-        return;
-      }
+    if (!email.endsWith('@protonmail.com')) {
+      response.style.color = 'red';
+      response.textContent = 'Error: Must use a ProtonMail email.';
+      return;
+    }
 
-      response.style.color = 'lime';
-      response.textContent = `Welcome aboard, ${username}! Your Skynet account is "securely" created.`;
+    // Check if account already exists
+    const existingUsers = JSON.parse(localStorage.getItem('skynetUsers') || '{}');
+    if (existingUsers[email]) {
+      response.style.color = 'orange';
+      response.textContent = 'Account already exists. Try logging in.';
+      return;
+    }
 
-      form.reset();
-    });
-  </script>
+    // Save user to localStorage
+    existingUsers[email] = { username, password };
+    localStorage.setItem('skynetUsers', JSON.stringify(existingUsers));
+
+    response.style.color = 'lime';
+    response.textContent = `Welcome aboard, ${username}! Account created.`;    
+
+    form.reset();
+  });
+</script>
 </body>
 </html>
