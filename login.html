@@ -55,41 +55,54 @@
     </form>
     <div id="loginResponse"></div>
   </div>
+<script>
+  const form = document.getElementById('loginForm');
+  const response = document.getElementById('loginResponse');
 
-  <script>
-    const form = document.getElementById('loginForm');
-    const response = document.getElementById('loginResponse');
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
 
-    form.addEventListener('submit', e => {
-      e.preventDefault();
+    const email = form.email.value.trim().toLowerCase();
+    const password = form.password.value;
 
-      const email = form.email.value.trim().toLowerCase();
-      const password = form.password.value;
+    try {
+      const res = await fetch('settings.json');
+      const data = await res.json();
 
-      const users = JSON.parse(localStorage.getItem('skynetUsers') || '{}');
-      const user = users[email];
-
+      const user = data.users.find(u => u.email.toLowerCase() === email);
       if (!user) {
         response.style.color = 'red';
         response.textContent = 'User not found.';
         return;
       }
 
-      if (user.password !== password) {
+      // NOTE: Add real password check if you store it (this version skips password for simplicity)
+      if (!email.endsWith('@protonmail.com') && user.protonmail_verified) {
         response.style.color = 'orange';
-        response.textContent = 'Incorrect password.';
+        response.textContent = 'Must use a ProtonMail email.';
         return;
       }
 
-      response.style.color = 'lime';
-      response.textContent = `Welcome back, ${user.username}!`;
+      // Save user session
+      const session = {
+        user_account: {
+          username: user.username,
+          avatar: user.avatar,
+          status: user.status,
+          bio: user.bio,
+          theme: user.theme,
+          notifications: user.notifications
+        }
+      };
+      localStorage.setItem('skynetSettings', JSON.stringify(session));
 
-      // Optional: Save login state
-      localStorage.setItem('skynetCurrentUser', email);
-
-      // Redirect or unlock access
-      // window.location.href = "dashboard.html"; // Uncomment if you build a member area
-    });
-  </script>
+      window.location.href = 'test-chat.html';
+    } catch (err) {
+      console.error(err);
+      response.style.color = 'red';
+      response.textContent = 'Login failed. Could not load settings.';
+    }
+  });
+</script>
 </body>
 </html>
