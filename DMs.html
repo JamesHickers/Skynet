@@ -135,9 +135,12 @@ textInput.addEventListener('keydown', e => {
 });
 
 function createDMThread(username) {
+  const existing = document.getElementById(`chatMessages-${username}`);
+  if (existing) return;
   const thread = document.createElement('div');
   thread.id = `chatMessages-${username}`;
   thread.className = 'chat-thread';
+  thread.style.display = 'none';
   chatContainer.appendChild(thread);
 }
 
