@@ -118,97 +118,101 @@
   </div>
 
   <script defer>
-    let activeDM = null;
-    const chatContainer = document.getElementById('chatMessagesContainer');
-    const dmList = document.getElementById('dmList');
-    const textInput = document.getElementById('textInput');
-    const fileInput = document.getElementById('fileInput');
-    const sendBtn = document.getElementById('sendBtn');
+let activeDM = null;
+const chatContainer = document.getElementById('chatMessagesContainer');
+const dmList = document.getElementById('dmList');
+const textInput = document.getElementById('textInput');
+const fileInput = document.getElementById('fileInput');
+const sendBtn = document.getElementById('sendBtn');
+const profileContainer = document.getElementById('profileContainer');
 
-    sendBtn.addEventListener('click', sendMessage);
-    textInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        sendMessage();
+sendBtn.addEventListener('click', sendMessage);
+textInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+function createDMThread(username) {
+  const thread = document.createElement('div');
+  thread.id = `chatMessages-${username}`;
+  thread.className = 'chat-thread';
+  chatContainer.appendChild(thread);
+}
+
+function switchDM(username) {
+  if (activeDM) {
+    document.getElementById(`chatMessages-${activeDM}`).style.display = 'none';
+  }
+  activeDM = username;
+  document.getElementById(`chatMessages-${username}`).style.display = 'block';
+}
+
+async function sendMessage() {
+  const text = textInput.value.trim();
+  const file = fileInput.files[0];
+  if (!text && !file) return;
+
+  let embed = '';
+
+  if (file) {
+    const formData = new FormData();
+    formData.append('reqtype', 'fileupload');
+    formData.append('fileToUpload', file);
+
+    try {
+      const res = await fetch('https://catbox.moe/user/api.php', {
+        method: 'POST',
+        body: formData
+      });
+
+      const url = await res.text();
+      if (!url.startsWith('http')) throw new Error('Upload failed');
+
+      const lower = file.name.toLowerCase();
+      if (/\.(jpe?g|png|gif|webp|bmp)$/.test(lower)) {
+        embed = `<div><a href="${url}" target="_blank">${url}</a><br><img src="${url}" /></div>`;
+      } else if (/\.(mp4|webm|ogg)$/.test(lower)) {
+        embed = `<div><a href="${url}" target="_blank">${url}</a><br><video controls src="${url}"></video></div>`;
+      } else if (/\.(mp3|wav|ogg|flac)$/.test(lower)) {
+        embed = `<div><a href="${url}" target="_blank">${url}</a><br><audio controls src="${url}"></audio></div>`;
+      } else if (/\.(txt|log|md|json|js|html|lua|cpp)$/.test(lower)) {
+        embed = `<div><a href="${url}" target="_blank">${url}</a><br><iframe src="${url}" style="width:100%;height:300px;background:#000;border:none;"></iframe></div>`;
+      } else {
+        embed = `<a href="${url}" target="_blank">📎 ${file.name}</a>`;
       }
-    });
-
-    function createDMThread(username) {
-      const thread = document.createElement('div');
-      thread.id = `chatMessages-${username}`;
-      thread.className = 'chat-thread';
-      chatContainer.appendChild(thread);
+    } catch (err) {
+      alert("Upload failed: " + err.message);
+      return;
     }
+  }
 
-    function switchDM(username) {
-      if (activeDM) {
-        document.getElementById(`chatMessages-${activeDM}`).style.display = 'none';
-      }
-      activeDM = username;
-      document.getElementById(`chatMessages-${username}`).style.display = 'block';
-    }
+  const chat = document.getElementById(`chatMessages-${activeDM}`);
+  let messageHTML = '';
+  if (text) messageHTML += `<div class="message"><span class="message-user">You</span>: ${text}</div>`;
+  if (embed) messageHTML += `<div class="message"><span class="message-user">You</span>: ${embed}</div>`;
+  chat.insertAdjacentHTML('beforeend', messageHTML);
 
-    async function sendMessage() {
-      const text = textInput.value.trim();
-      const file = fileInput.files[0];
-      if (!text && !file) return;
+  textInput.value = '';
+  fileInput.value = '';
+  chat.scrollTop = chat.scrollHeight;
+}
 
-      let embed = '';
-
-      if (file) {
-        const formData = new FormData();
-        formData.append('reqtype', 'fileupload');
-        formData.append('fileToUpload', file);
-
-        try {
-          const res = await fetch('https://catbox.moe/user/api.php', {
-            method: 'POST',
-            body: formData
-          });
-
-          const url = await res.text();
-          if (!url.startsWith('http')) throw new Error('Upload failed');
-
-          const lower = file.name.toLowerCase();
-
-          if (/\.(jpe?g|png|gif|webp|bmp)$/.test(lower)) {
-            embed = `<div><a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a><br><img src="${url}" alt="image"></div>`;
-          } else if (/\.(mp4|webm|ogg)$/.test(lower)) {
-            embed = `<div><a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a><br><video controls src="${url}"></video></div>`;
-          } else if (/\.(mp3|wav|ogg|flac)$/.test(lower)) {
-            embed = `<div><a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a><br><audio controls src="${url}"></audio></div>`;
-          } else if (/\.(txt|log|md|json|js|html|lua|cpp)$/.test(lower)) {
-            embed = `<div><a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a><br><iframe src="${url}" style="width:100%;height:300px;background:#000;border:none;"></iframe></div>`;
-          } else {
-            embed = `<a href="${url}" target="_blank" rel="noopener noreferrer">📎 ${file.name}</a>`;
-          }
-        } catch (err) {
-          alert("Upload failed: " + err.message);
-          return;
-        }
-      }
-
-      const chat = document.getElementById(`chatMessages-${activeDM}`);
-      let messageHTML = '';
-      if (text) messageHTML += `<div class="message"><span class="message-user">You</span>: ${text}</div>`;
-      if (embed) messageHTML += `<div class="message"><span class="message-user">You</span>: ${embed}</div>`;
-      chat.insertAdjacentHTML('beforeend', messageHTML);
-
-      textInput.value = '';
-      fileInput.value = '';
-      chat.scrollTop = chat.scrollHeight;
-    }
-
+// 🧠 THIS IS THE FIXED SETTINGS LOADER
 const settings = JSON.parse(localStorage.getItem('skynetSettings') || '{}');
 const user = settings.user_account;
 
-if (user) {
+if (!user) {
+  alert("No user found. Please log in.");
+  window.location.href = "login.html";
+} else {
   document.body.style.backgroundColor = user.theme === 'darkmode' ? '#111' : '#fff';
   document.body.style.color = user.theme === 'darkmode' ? '#eee' : '#000';
 
-  const profile = `
-    <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #1a1a1a; border-radius: 8px; margin-bottom: 10px;">
-      <img src="${user.avatar}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%;" />
+  const profileHTML = `
+    <div class="profile-header">
+      <img src="${user.avatar}" alt="Avatar" />
       <div>
         <div style="font-weight: bold; color: #4caf50;">
           ${user.username}
@@ -218,46 +222,24 @@ if (user) {
       </div>
     </div>
   `;
-  document.getElementById('chatMessages').insertAdjacentHTML('afterbegin', profile);
-} else {
-  alert("No user found. Please log in.");
-  window.location.href = "login.html";
+  profileContainer.innerHTML = profileHTML;
+
+  // 🧑‍🤝‍🧑 CREATE CONTACTS
+  if (user.contacts && Array.isArray(user.contacts)) {
+    user.contacts.forEach(username => {
+      createDMThread(username);
+      const btn = document.createElement('button');
+      btn.textContent = username;
+      btn.onclick = () => switchDM(username);
+      dmList.appendChild(btn);
+    });
+
+    if (user.contacts.length > 0) {
+      switchDM(user.contacts[0]);
+    }
+  }
 }
-      })
-      .then(data => {
-        const user = data.user_account;
-
-        const profile = `
-          <div class="profile-header">
-            <img src="${user.avatar}" alt="Avatar" />
-            <div>
-              <div style="font-weight: bold; color: #4caf50;">
-                ${user.username}
-                <span style="font-size: 0.8em; color: ${user.status === 'online' ? '#0f0' : '#aaa'};">(${user.status})</span>
-              </div>
-              <div style="font-size: 0.9em; color: #ccc;">${user.bio}</div>
-            </div>
-          </div>
-        `;
-        document.getElementById('profileContainer').innerHTML = profile;
-
-        user.contacts.forEach(username => {
-          createDMThread(username);
-          const btn = document.createElement('button');
-          btn.textContent = username;
-          btn.onclick = () => switchDM(username);
-          dmList.appendChild(btn);
-        });
-
-        if (user.contacts.length > 0) {
-          switchDM(user.contacts[0]);
-        }
-      })
-      .catch(error => {
-        console.error("Error loading settings:", error);
-        alert("Failed to load user settings.");
-      });
-  </script>
+</script>
   <script src="CORS.js" defer></script>
 </body>
 </html>
