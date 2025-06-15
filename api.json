@@ -1,10 +1,7 @@
 {
   "skynet_api": {
     "version": "1.0",
-    "base_url": "https://api.skynet.com/v1",
-    "authentication": {
-      "required": true,
-      "method": "Bearer Token"
+    "base_url": "https://api.skynet.com/v1"
     },
     "endpoints": {
       "accounts": {
